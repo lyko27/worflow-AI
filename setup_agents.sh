@@ -66,8 +66,8 @@ done
 
 print_banner
 
-# 1. Vérification des prérequis système
-echo -e "${BLUE}[1/4] Vérification de l'environnement...${NC}"
+# 1. Vérification des prérequis système & Installation des navigateurs
+echo -e "${BLUE}[1/5] Vérification de l'environnement & des outils QA/MCP...${NC}"
 
 if command -v node >/dev/null 2>&1; then
     NODE_VERSION=$(node -v)
@@ -78,8 +78,23 @@ fi
 
 if command -v npx >/dev/null 2>&1; then
     echo -e "  ${GREEN}✓${NC} npx disponible pour @executeautomation/playwright-mcp-server"
+    
+    # Vérification et installation automatique de Chromium pour Playwright
+    if command -v node >/dev/null 2>&1; then
+        echo -e "  ${CYAN}ℹ${NC} Vérification / initialisation du navigateur Chromium pour Playwright..."
+        npx -y playwright install chromium >/dev/null 2>&1 && \
+            echo -e "  ${GREEN}✓${NC} Navigateur Chromium Playwright opérationnel pour les captures et tests QA." || \
+            echo -e "  ${YELLOW}⚠ Échec du téléchargement automatique de Chromium. Exécutez 'npx playwright install chromium' manuellement.${NC}"
+    fi
 else
     echo -e "  ${YELLOW}⚠ npx non détecté.${NC} Installez Node.js/npm pour activer le serveur MCP."
+fi
+
+if command -v python3 >/dev/null 2>&1; then
+    PY_VERSION=$(python3 --version 2>&1)
+    echo -e "  ${GREEN}✓${NC} Python 3 détecté : ${PY_VERSION} (serveurs locaux & scripts)"
+else
+    echo -e "  ${YELLOW}⚠ Python 3 non détecté.${NC}"
 fi
 
 if command -v agy >/dev/null 2>&1; then
@@ -88,9 +103,13 @@ else
     echo -e "  ${YELLOW}ℹ Antigravity CLI (agy) non présent dans le PATH.${NC}"
 fi
 
+if command -v eog >/dev/null 2>&1 || command -v xdg-open >/dev/null 2>&1; then
+    echo -e "  ${GREEN}✓${NC} Outil d'affichage d'images système disponible pour visualiser les captures."
+fi
+
 # 2. Préparation du répertoire cible
 echo ""
-echo -e "${BLUE}[2/4] Initialisation des dossiers cibles dans : ${CYAN}${TARGET_DIR}${NC}"
+echo -e "${BLUE}[2/5] Initialisation des dossiers cibles dans : ${CYAN}${TARGET_DIR}${NC}"
 
 if [ "$INSTALL_GLOBAL" = true ]; then
     mkdir -p "${TARGET_DIR}/agents/researcher"
@@ -104,7 +123,7 @@ fi
 
 # 3. Déploiement des règles et des définitions d'agents
 echo ""
-echo -e "${BLUE}[3/4] Déploiement des définitions d'agents et configuration MCP...${NC}"
+echo -e "${BLUE}[3/5] Déploiement des définitions d'agents et configuration MCP...${NC}"
 
 if [ "$INSTALL_GLOBAL" = true ]; then
     cp -r "${SCRIPT_DIR}/.agents/agents/"* "${TARGET_DIR}/agents/"
@@ -155,7 +174,7 @@ try:
         if rule not in allow_list:
             allow_list.append(rule)
 
-    for rule in ['command(rm -rf /)', 'command(sudo *)', 'write_file(/etc/*)', 'write_file(~/.ssh/*)']:
+    for rule in ['command(rm -rf)', 'command(sudo)', 'write_file(/etc)', 'write_file(/root)']:
         if rule not in deny_list:
             deny_list.append(rule)
 
@@ -177,11 +196,11 @@ fi
 # 5. Résumé et validation
 echo ""
 echo -e "${BLUE}[5/5] Validation de la structure...${NC}"
-echo -e "  ${GREEN}✓${NC} Agent @researcher : Recherche web & documentation technique"
-echo -e "  ${GREEN}✓${NC} Agent @coder      : Implémentation de code propre, typé et modulaire"
-echo -e "  ${GREEN}✓${NC} Agent @ui-tester  : QA, navigation Playwright MCP & screenshots"
+echo -e "  ${GREEN}✓${NC} Agent @researcher : Recherche web, documentation technique & inspection terrain (anti-hallucination)"
+echo -e "  ${GREEN}✓${NC} Agent @coder      : Implémentation atomique, typage strict, règles anti-hallucination & équilibre visuel"
+echo -e "  ${GREEN}✓${NC} Agent @ui-tester  : QA, navigation Playwright MCP & captures multi-écrans obligatoires (Desktop/Mobile)"
 echo -e "  ${GREEN}✓${NC} Serveur MCP       : @executeautomation/playwright-mcp-server"
-echo -e "  ${GREEN}✓${NC} Mode Manager      : Autonomie complète active (retour uniquement au résultat final)"
+echo -e "  ${GREEN}✓${NC} Mode Manager      : Autonomie complète avec barrière séquentielle stricte et inspection visuelle réelle"
 
 echo ""
 echo -e "${GREEN}================================================================${NC}"
