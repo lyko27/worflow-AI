@@ -1,0 +1,13 @@
+# OS & Editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
+
+# Logs & Playwright screenshots / temporary artifacts
+*.log
+screenshots/
+tmp/
+temp/
