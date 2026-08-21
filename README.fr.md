@@ -10,14 +10,14 @@ Le but de ce workflow est d'éviter les erreurs classiques des LLMs (hallucinati
 
 ### Comment ça marche
 
-Le système fonctionne avec un agent principal (**Lead Architect**) qui pilote 3 sous-agents spécialisés :
+Le système fonctionne avec un agent principal (**Lead**) qui pilote 3 sous-agents spécialisés :
 
 ```mermaid
 flowchart TD
     Start([Demande / Tâche]) --> P1[1. Recherche & Cadrage\n@researcher]
     P1 --> P2[2. Écriture du code\n@coder]
     P2 --> P3[3. Test visuel & QA\n@ui-tester + Playwright]
-    P3 --> P4{4. Validation finale\nLead Architect}
+    P3 --> P4{4. Validation finale\nLead}
     P4 -- Retouches si besoin --> P2
     P4 -- Validé --> End([Terminé])
 ```
@@ -25,7 +25,7 @@ flowchart TD
 1. **Recherche (`@researcher`)** : Vérifie la documentation officielle, inspecte les fichiers existants et cadre la tâche. Le codeur ne démarre pas tant que ce cadrage n'est pas validé.
 2. **Implémentation (`@coder`)** : Écrit le code propre, typé et modulaire en suivant strictement le plan de la phase 1.
 3. **Tests & QA (`@ui-tester`)** : Ouvre un vrai navigateur via Playwright MCP, teste les parcours et prend des captures d'écran (Desktop 1200px et Mobile 390px).
-4. **Validation (Lead Architect)** : Vérifie le code et inspecte visuellement les captures d'écran avant de valider la tâche.
+4. **Validation (Lead)** : Vérifie le code et inspecte visuellement les captures d'écran avant de valider la tâche.
 
 ---
 

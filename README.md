@@ -10,14 +10,14 @@ The goal of this workflow is to prevent common LLM pitfalls (hallucinated APIs, 
 
 ### How It Works
 
-The workflow uses a main agent (**Lead Architect**) orchestrating 3 specialized subagents:
+The workflow uses a main agent (**Lead**) orchestrating 3 specialized subagents:
 
 ```mermaid
 flowchart TD
-    Start([Task / Prompt]) --> P1[1. Research & Scoping\n@researcher]
+    Start([Task / Prompt]) --> P1[1. Research et Scoping\n@researcher]
     P1 --> P2[2. Code Implementation\n@coder]
     P2 --> P3[3. Visual Testing & QA\n@ui-tester + Playwright]
-    P3 --> P4{4. Final Review\nLead Architect}
+    P3 --> P4{4. Final Review\nLead}
     P4 -- Fixes if needed --> P2
     P4 -- Approved --> End([Done])
 ```
@@ -25,7 +25,7 @@ flowchart TD
 1. **Research (`@researcher`)**: Inspects existing project files and checks official documentation before any code is written. The coder will not start until this research is validated.
 2. **Implementation (`@coder`)**: Writes clean, typed, modular code strictly following the phase 1 specification.
 3. **Tests & QA (`@ui-tester`)**: Runs real browser sessions via Playwright MCP, tests user flows, and takes screenshots (Desktop 1200px and Mobile 390px).
-4. **Validation (Lead Architect)**: Inspects code changes and visual screenshots before completing the task.
+4. **Validation (Lead)**: Inspects code changes and visual screenshots before completing the task.
 
 ---
 
