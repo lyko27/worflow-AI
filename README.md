@@ -1,74 +1,77 @@
-# Workflow Multi-Agents — Antigravity CLI (AGY)
+[🇫🇷 Lire en français](README.fr.md)
 
-Configuration et scripts d'orchestration pour structurer le développement assisté par IA avec **Antigravity CLI (AGY)**.
+# Multi-Agent Workflow — Antigravity CLI (AGY)
 
-Le but de ce workflow est d'éviter les erreurs classiques des LLMs (hallucinations d'APIs, manque de planification, code non testé) en appliquant un cycle de travail rigoureux en 4 étapes.
+Configuration and orchestration scripts to structure AI-assisted software development using **Antigravity CLI (AGY)**.
+
+The goal of this workflow is to prevent common LLM pitfalls (hallucinated APIs, lack of planning, untested code) by enforcing a strict 4-step engineering cycle.
 
 ---
 
-### Comment ça marche
+### How It Works
 
-Le système fonctionne avec un agent principal (**Lead Architect**) qui pilote 3 sous-agents spécialisés :
+The workflow uses a main agent (**Lead Architect**) orchestrating 3 specialized subagents:
 
 ```mermaid
 flowchart TD
-    Start([Demande / Tâche]) --> P1[1. Recherche & Cadrage\n@researcher]
-    P1 --> P2[2. Écriture du code\n@coder]
-    P2 --> P3[3. Test visuel & QA\n@ui-tester + Playwright]
-    P3 --> P4{4. Validation finale\nLead Architect}
-    P4 -- Retouches si besoin --> P2
-    P4 -- Validé --> End([Terminé])
+    Start([Task / Prompt]) --> P1[1. Research & Scoping\n@researcher]
+    P1 --> P2[2. Code Implementation\n@coder]
+    P2 --> P3[3. Visual Testing & QA\n@ui-tester + Playwright]
+    P3 --> P4{4. Final Review\nLead Architect}
+    P4 -- Fixes if needed --> P2
+    P4 -- Approved --> End([Done])
 ```
 
-1. **Recherche (`@researcher`)** : Vérifie la documentation officielle, inspecte les fichiers existants et cadre la tâche. Le codeur ne démarre pas tant que ce cadrage n'est pas validé.
-2. **Implémentation (`@coder`)** : Écrit le code propre, typé et modulaire en suivant strictement le plan de la phase 1.
-3. **Tests & QA (`@ui-tester`)** : Ouvre un vrai navigateur via Playwright MCP, teste les parcours et prend des captures d'écran (Desktop 1200px et Mobile 390px).
-4. **Validation (Lead Architect)** : Vérifie le code et inspecte visuellement les captures d'écran avant de valider la tâche.
+1. **Research (`@researcher`)**: Inspects existing project files and checks official documentation before any code is written. The coder will not start until this research is validated.
+2. **Implementation (`@coder`)**: Writes clean, typed, modular code strictly following the phase 1 specification.
+3. **Tests & QA (`@ui-tester`)**: Runs real browser sessions via Playwright MCP, tests user flows, and takes screenshots (Desktop 1200px and Mobile 390px).
+4. **Validation (Lead Architect)**: Inspects code changes and visual screenshots before completing the task.
 
 ---
 
-### Installation & Utilisation
+### Setup & Usage
 
-Le script `setup_agents.sh` permet d'installer facilement les agents et la configuration dans n'importe quel projet ou sur la machine :
+The `setup_agents.sh` script installs the agents and MCP configuration into any project directory or globally:
 
 ```bash
-# Rendre le script exécutable
+# Make script executable
 chmod +x setup_agents.sh
 
-# Installer dans le dossier courant
+# Install in current directory
 ./setup_agents.sh
 
-# Installer dans un autre dossier de projet
-./setup_agents.sh /chemin/vers/projet
+# Install in another project directory
+./setup_agents.sh /path/to/project
 
-# Installer globalement dans ~/.gemini/config/
+# Install globally in ~/.gemini/config/
 ./setup_agents.sh --global
 ```
 
 ---
 
-### Structure du dépôt
+### Repository Structure
 
 ```text
 workflow/
 ├── .agents/
 │   ├── agents/
-│   │   ├── coder/agent.md        # Prompt et outils du sous-agent Coder
-│   │   ├── researcher/agent.md   # Prompt et outils du sous-agent Researcher
-│   │   └── ui-tester/agent.md    # Prompt et outils du sous-agent UI-Tester
-│   └── mcp_config.json           # Config MCP pour Playwright
-├── AGENTS.md                     # Règles de gouvernance et détails des 4 phases
-├── documentation_agy.md          # Doc de référence Antigravity CLI
-├── setup_agents.sh               # Script d'installation automatique
+│   │   ├── coder/agent.md        # System prompt & tools for Coder subagent
+│   │   ├── researcher/agent.md   # System prompt & tools for Researcher subagent
+│   │   └── ui-tester/agent.md    # System prompt & tools for UI-Tester subagent
+│   └── mcp_config.json           # Playwright MCP server configuration
+├── AGENTS.md                     # Governance protocol and 4-phase details
+├── documentation_agy.md          # Antigravity CLI reference documentation
+├── setup_agents.sh               # Automated deployment script
 ├── .gitignore
 ├── LICENSE
-└── README.md
+├── README.fr.md                  # French documentation
+└── README.md                     # English documentation (default)
 ```
 
 ---
 
-### Outils & Prérequis
+### Tools & Prerequisites
 
-- **Node.js & npx** : Utilisé pour faire tourner le serveur MCP Playwright (`@executeautomation/playwright-mcp-server`) sans installation lourde.
-- **Antigravity CLI (agy)** : CLI d'agentique Google DeepMind.
-- **Python 3** : Utilisé pour les serveurs locaux de test.
+- **Node.js & npx**: Runs the Playwright MCP server (`@executeautomation/playwright-mcp-server`) on demand.
+- **Antigravity CLI (agy)**: Google DeepMind agentic CLI.
+- **Python 3**: Used for local test servers.
