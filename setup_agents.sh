@@ -115,18 +115,25 @@ if [ "$INSTALL_GLOBAL" = true ]; then
     mkdir -p "${TARGET_DIR}/agents/researcher"
     mkdir -p "${TARGET_DIR}/agents/coder"
     mkdir -p "${TARGET_DIR}/agents/ui-tester"
+    mkdir -p "${TARGET_DIR}/skills/project-introspection"
+    mkdir -p "${TARGET_DIR}/skills/distill-workflow"
 else
     mkdir -p "${TARGET_DIR}/.agents/agents/researcher"
     mkdir -p "${TARGET_DIR}/.agents/agents/coder"
     mkdir -p "${TARGET_DIR}/.agents/agents/ui-tester"
+    mkdir -p "${TARGET_DIR}/.agents/skills/project-introspection"
+    mkdir -p "${TARGET_DIR}/.agents/skills/distill-workflow"
 fi
 
 # 3. Déploiement des règles et des définitions d'agents
 echo ""
-echo -e "${BLUE}[3/5] Déploiement des définitions d'agents et configuration MCP...${NC}"
+echo -e "${BLUE}[3/5] Déploiement des définitions d'agents, des compétences et de la configuration MCP...${NC}"
 
 if [ "$INSTALL_GLOBAL" = true ]; then
     cp -r "${SCRIPT_DIR}/.agents/agents/"* "${TARGET_DIR}/agents/"
+    if [ -d "${SCRIPT_DIR}/.agents/skills" ]; then
+        cp -r "${SCRIPT_DIR}/.agents/skills/"* "${TARGET_DIR}/skills/"
+    fi
     cp "${SCRIPT_DIR}/.agents/mcp_config.json" "${TARGET_DIR}/mcp_config.json"
     echo -e "  ${GREEN}✓${NC} Configuration globale déployée dans ${TARGET_DIR}"
 else
@@ -136,9 +143,10 @@ else
         echo -e "  ${GREEN}✓${NC} Fichier de règles ${CYAN}AGENTS.md${NC} copié."
     fi
 
-    # Copie de la hiérarchie .agents
+    # Copie de la hiérarchie .agents (agents + skills)
     cp -r "${SCRIPT_DIR}/.agents/"* "${TARGET_DIR}/.agents/"
     echo -e "  ${GREEN}✓${NC} Définitions des sous-agents copiées dans ${CYAN}.agents/agents/${NC}"
+    echo -e "  ${GREEN}✓${NC} Compétences / Skills copiées dans ${CYAN}.agents/skills/${NC}"
     echo -e "  ${GREEN}✓${NC} Configuration MCP Playwright copiée dans ${CYAN}.agents/mcp_config.json${NC}"
 fi
 
@@ -199,6 +207,8 @@ echo -e "${BLUE}[5/5] Validation de la structure...${NC}"
 echo -e "  ${GREEN}✓${NC} Agent @researcher : Recherche web, documentation technique & inspection terrain (anti-hallucination)"
 echo -e "  ${GREEN}✓${NC} Agent @coder      : Implémentation atomique, typage strict, règles anti-hallucination & équilibre visuel"
 echo -e "  ${GREEN}✓${NC} Agent @ui-tester  : QA, navigation Playwright MCP & captures multi-écrans obligatoires (Desktop/Mobile)"
+echo -e "  ${GREEN}✓${NC} Skill /project-introspection : Analyse des conversations et adaptation des agents locaux"
+echo -e "  ${GREEN}✓${NC} Skill /distill-workflow      : Distillation des améliorations universelles vers le dépôt central"
 echo -e "  ${GREEN}✓${NC} Serveur MCP       : @executeautomation/playwright-mcp-server"
 echo -e "  ${GREEN}✓${NC} Mode Manager      : Autonomie complète avec barrière séquentielle stricte et inspection visuelle réelle"
 
@@ -211,8 +221,10 @@ echo -e "Pour démarrer votre session de travail assistée par IA :"
 echo -e "  ${CYAN}cd ${TARGET_DIR} && agy${NC}"
 echo ""
 echo -e "Utilisation recommandée en tant que Manager :"
-echo -e "  ${YELLOW}/goal <votre ordre>${NC}   Lance la mission complète en autonomie (Phases 1 à 4)"
-echo -e "  ${YELLOW}/agents${NC}             Ouvrir le panneau interactif de gestion des agents"
-echo -e "  ${YELLOW}/tasks${NC}              Suivre les commandes et serveurs en arrière-plan"
-echo -e "  ${YELLOW}/diff${NC}               Visualiser les modifications avant commit"
+echo -e "  ${YELLOW}/goal <votre ordre>${NC}         Lance la mission complète en autonomie (Phases 1 à 4)"
+echo -e "  ${YELLOW}/project-introspection${NC}     Analyser la conversation et adapter les agents locaux"
+echo -e "  ${YELLOW}/distill-workflow${NC}          Transférer les améliorations universelles vers le workflow de base"
+echo -e "  ${YELLOW}/agents${NC}                    Ouvrir le panneau interactif de gestion des agents"
+echo -e "  ${YELLOW}/tasks${NC}                     Suivre les commandes et serveurs en arrière-plan"
+echo -e "  ${YELLOW}/diff${NC}                      Visualiser les modifications avant commit"
 echo ""

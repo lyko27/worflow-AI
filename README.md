@@ -49,23 +49,35 @@ chmod +x setup_agents.sh
 
 ---
 
+### Continuous Improvement Skills
+
+The workflow includes two built-in slash command skills for continuous learning:
+
+- **`/project-introspection`**: Analyzes the active conversation logs (`transcript.jsonl`), user feedback, and friction points to adapt or create subagents for the **local project**.
+- **`/distill-workflow`**: At project completion, extracts **universal improvements** (prompts, QA checklists, governance rules) and syncs them to the **central workflow base** while strictly filtering out all project-specific logic or credentials.
+
+---
+
 ### Repository Structure
 
 ```text
 workflow/
 ├── .agents/
 │   ├── agents/
-│   │   ├── coder/agent.md        # System prompt & tools for Coder subagent
-│   │   ├── researcher/agent.md   # System prompt & tools for Researcher subagent
-│   │   └── ui-tester/agent.md    # System prompt & tools for UI-Tester subagent
-│   └── mcp_config.json           # Playwright MCP server configuration
-├── AGENTS.md                     # Governance protocol and 4-phase details
-├── documentation_agy.md          # Antigravity CLI reference documentation
-├── setup_agents.sh               # Automated deployment script
+│   │   ├── coder/agent.md                    # System prompt & tools for Coder subagent
+│   │   ├── researcher/agent.md               # System prompt & tools for Researcher subagent
+│   │   └── ui-tester/agent.md                # System prompt & tools for UI-Tester subagent
+│   ├── skills/
+│   │   ├── project-introspection/SKILL.md    # Local conversation introspection skill
+│   │   └── distill-workflow/SKILL.md         # Global core workflow distillation skill
+│   └── mcp_config.json                       # Playwright MCP server configuration
+├── AGENTS.md                                 # Governance protocol and 4-phase details
+├── documentation_agy.md                      # Antigravity CLI reference documentation
+├── setup_agents.sh                           # Automated deployment script
 ├── .gitignore
 ├── LICENSE
-├── README.fr.md                  # French documentation
-└── README.md                     # English documentation (default)
+├── README.fr.md                              # French documentation
+└── README.md                                 # English documentation (default)
 ```
 
 ---
@@ -74,4 +86,5 @@ workflow/
 
 - **Node.js & npx**: Runs the Playwright MCP server (`@executeautomation/playwright-mcp-server`) on demand.
 - **Antigravity CLI (agy)**: Google DeepMind agentic CLI.
-- **Python 3**: Used for local test servers.
+- **Python 3**: Used for local test servers and workflow analysis scripts.
+

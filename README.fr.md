@@ -49,23 +49,35 @@ chmod +x setup_agents.sh
 
 ---
 
+### Compétences d'Amélioration Continue (Skills)
+
+Le workflow intègre deux compétences slash commands pour l'apprentissage continu :
+
+- **`/project-introspection`** : Analyse les logs de conversation (`transcript.jsonl`), les retours du manager et les blocages pour adapter ou créer les sous-agents du **projet local**.
+- **`/distill-workflow`** : À la fin d'un projet, extrait les **améliorations universelles** (prompts, protocoles QA, règles de gouvernance) et met à jour le **dépôt central du workflow** tout en filtrant strictement toute logique métier ou secret local.
+
+---
+
 ### Structure du dépôt
 
 ```text
 workflow/
 ├── .agents/
 │   ├── agents/
-│   │   ├── coder/agent.md        # Prompt et outils du sous-agent Coder
-│   │   ├── researcher/agent.md   # Prompt et outils du sous-agent Researcher
-│   │   └── ui-tester/agent.md    # Prompt et outils du sous-agent UI-Tester
-│   └── mcp_config.json           # Config MCP pour Playwright
-├── AGENTS.md                     # Règles de gouvernance et détails des 4 phases
-├── documentation_agy.md          # Doc de référence Antigravity CLI
-├── setup_agents.sh               # Script d'installation automatique
+│   │   ├── coder/agent.md                    # Prompt et outils du sous-agent Coder
+│   │   ├── researcher/agent.md               # Prompt et outils du sous-agent Researcher
+│   │   └── ui-tester/agent.md                # Prompt et outils du sous-agent UI-Tester
+│   ├── skills/
+│   │   ├── project-introspection/SKILL.md    # Compétence d'introspection locale
+│   │   └── distill-workflow/SKILL.md         # Compétence de distillation globale
+│   └── mcp_config.json                       # Config MCP pour Playwright
+├── AGENTS.md                                 # Règles de gouvernance et détails des 4 phases
+├── documentation_agy.md                      # Doc de référence Antigravity CLI
+├── setup_agents.sh                           # Script d'installation automatique
 ├── .gitignore
 ├── LICENSE
-├── README.fr.md                  # Documentation en français
-└── README.md                     # English documentation (default)
+├── README.fr.md                              # Documentation en français
+└── README.md                                 # English documentation (default)
 ```
 
 ---
@@ -74,4 +86,5 @@ workflow/
 
 - **Node.js & npx** : Utilisé pour faire tourner le serveur MCP Playwright (`@executeautomation/playwright-mcp-server`) sans installation lourde.
 - **Antigravity CLI (agy)** : CLI d'agentique Google DeepMind.
-- **Python 3** : Utilisé pour les serveurs locaux de test.
+- **Python 3** : Utilisé pour les serveurs locaux de test et les scripts d'analyse de workflow.
+
