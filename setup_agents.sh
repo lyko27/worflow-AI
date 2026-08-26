@@ -22,7 +22,7 @@ INSTALL_GLOBAL=false
 print_banner() {
     echo -e "${PURPLE}"
     echo "  ================================================================"
-    echo "   🚀 ANTIGRAVITY CLI — MULTI-AGENT ARCHITECTURE SETUP"
+    echo "   ANTIGRAVITY CLI — MULTI-AGENT ARCHITECTURE SETUP"
     echo "  ================================================================"
     echo -e "${NC}"
 }
@@ -204,7 +204,7 @@ echo -e "  ${GREEN}✓${NC} Mode Manager      : Autonomie complète avec barriè
 
 echo ""
 echo -e "${GREEN}================================================================${NC}"
-echo -e "${GREEN}✨ Architecture multi-agents initialisée avec succès !${NC}"
+echo -e "${GREEN}Architecture multi-agents initialisee avec succes !${NC}"
 echo -e "${GREEN}================================================================${NC}"
 echo ""
 echo -e "Pour démarrer votre session de travail assistée par IA :"
