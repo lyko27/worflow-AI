@@ -53,8 +53,8 @@ chmod +x setup_agents.sh
 
 Le workflow intègre deux compétences slash commands pour l'apprentissage continu :
 
-- **`/project-introspection`** : Analyse les logs de conversation (`transcript.jsonl`), les retours du manager et les blocages pour adapter ou créer les sous-agents du **projet local**.
-- **`/distill-workflow`** : À la fin d'un projet, extrait les **améliorations universelles** (prompts, protocoles QA, règles de gouvernance) et met à jour le **dépôt central du workflow** tout en filtrant strictement toute logique métier ou secret local.
+- **`/learn-local`** : Analyse les logs de conversation (`transcript.jsonl`), les retours du manager et les blocages pour adapter ou créer les sous-agents du **projet local**.
+- **`/learn-global`** : À la fin d'un projet, extrait les **améliorations universelles** (prompts, protocoles QA, règles de gouvernance) et met à jour le **dépôt central du workflow** tout en filtrant strictement toute logique métier ou secret local.
 
 ---
 
@@ -68,8 +68,8 @@ workflow/
 │   │   ├── researcher/agent.md               # Prompt et outils du sous-agent Researcher
 │   │   └── ui-tester/agent.md                # Prompt et outils du sous-agent UI-Tester
 │   ├── skills/
-│   │   ├── project-introspection/SKILL.md    # Compétence d'introspection locale
-│   │   └── distill-workflow/SKILL.md         # Compétence de distillation globale
+│   │   ├── learn-local/SKILL.md              # Compétence d'introspection locale
+│   │   └── learn-global/SKILL.md             # Compétence de distillation globale
 │   └── mcp_config.json                       # Config MCP pour Playwright
 ├── AGENTS.md                                 # Règles de gouvernance et détails des 4 phases
 ├── documentation_agy.md                      # Doc de référence Antigravity CLI

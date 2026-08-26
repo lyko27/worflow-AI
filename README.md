@@ -53,8 +53,8 @@ chmod +x setup_agents.sh
 
 The workflow includes two built-in slash command skills for continuous learning:
 
-- **`/project-introspection`**: Analyzes the active conversation logs (`transcript.jsonl`), user feedback, and friction points to adapt or create subagents for the **local project**.
-- **`/distill-workflow`**: At project completion, extracts **universal improvements** (prompts, QA checklists, governance rules) and syncs them to the **central workflow base** while strictly filtering out all project-specific logic or credentials.
+- **`/learn-local`**: Analyzes the active conversation logs (`transcript.jsonl`), user feedback, and friction points to adapt or create subagents for the **local project**.
+- **`/learn-global`**: At project completion, extracts **universal improvements** (prompts, QA checklists, governance rules) and syncs them to the **central workflow base** while strictly filtering out all project-specific logic or credentials.
 
 ---
 
@@ -68,8 +68,8 @@ workflow/
 │   │   ├── researcher/agent.md               # System prompt & tools for Researcher subagent
 │   │   └── ui-tester/agent.md                # System prompt & tools for UI-Tester subagent
 │   ├── skills/
-│   │   ├── project-introspection/SKILL.md    # Local conversation introspection skill
-│   │   └── distill-workflow/SKILL.md         # Global core workflow distillation skill
+│   │   ├── learn-local/SKILL.md              # Local conversation introspection skill
+│   │   └── learn-global/SKILL.md             # Global core workflow distillation skill
 │   └── mcp_config.json                       # Playwright MCP server configuration
 ├── AGENTS.md                                 # Governance protocol and 4-phase details
 ├── documentation_agy.md                      # Antigravity CLI reference documentation

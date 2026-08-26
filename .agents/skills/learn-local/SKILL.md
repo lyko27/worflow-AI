@@ -1,9 +1,9 @@
 ---
-name: project-introspection
+name: learn-local
 description: Analyzes active conversation transcripts, user feedback, friction points, and project requirements to introspect and adapt local project subagents, prompts, and governance rules.
 ---
 
-# Project Introspection & Local Agent Adaptation
+# Learn Local — Project Introspection & Local Agent Adaptation
 
 Cette competence permet d'analyser la conversation courante, les retours explicites de l'utilisateur, les reussites et les blocages techniques, afin de faire evoluer le pool d'agents du **projet local**.
 
@@ -14,7 +14,7 @@ Cette competence permet d'analyser la conversation courante, les retours explici
 - Apres plusieurs echanges ou a la fin d'un sprint de developpement dans le projet.
 - Lorsque l'utilisateur a exprime des corrections repetees, des preferences d'architecture ou des regles metier specifiques.
 - Lorsque l'agent principal constate des echecs d'outils repetes ou des manques dans les capacites des sous-agents locaux.
-- Sur demande explicite (ex: `/project-introspection` ou "analyse notre conversation et mets a jour nos agents").
+- Sur demande explicite : `/learn-local` (ou "analyse notre conversation et adapte nos agents").
 
 ---
 
@@ -23,7 +23,7 @@ Cette competence permet d'analyser la conversation courante, les retours explici
 ### Etape 1 : Extraction des Signaux de la Conversation
 1. Executer le script d'analyse des logs :
    ```bash
-   python3 .agents/skills/project-introspection/scripts/extract_conversation_insights.py
+   python3 .agents/skills/learn-local/scripts/extract_conversation_insights.py
    ```
 2. Analyser les points saillants :
    - Directives utilisateur prioritaires (corrections, preferences de style, conventions).

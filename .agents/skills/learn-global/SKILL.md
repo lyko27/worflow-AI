@@ -1,9 +1,9 @@
 ---
-name: distill-workflow
+name: learn-global
 description: Analyzes local conversation history and agent adaptations at project end, filters out all project-specific logic, and synchronizes generalized workflow improvements to the central workflow repository.
 ---
 
-# Workflow Distillation & Core Base Synchronization
+# Learn Global — Workflow Distillation & Core Base Synchronization
 
 Cette competence permet, a la fin d'un projet ou a la suite d'un jalon majeur, d'analyser les adaptations et enseignements locaux, d'en extraire les ameliorations **universelles** (prompts, garde-fous, protocoles QA, gouvernance), et de les synchroniser proprement vers le **depot central du workflow**.
 
@@ -21,7 +21,7 @@ Cette competence permet, a la fin d'un projet ou a la suite d'un jalon majeur, d
 - A la livraison finale d'un projet de developpement.
 - Apres avoir resolu des problemes complexes dont la solution a une valeur universelle pour tous les futurs projets.
 - Pour mettre a jour la base de reference (`/home/lyko/Dossier-perso/workflow` ou chemin configure) et la configuration globale (`~/.gemini/config/`).
-- Sur commande explicite : `/distill-workflow`.
+- Sur commande explicite : `/learn-global`.
 
 ---
 
@@ -30,13 +30,13 @@ Cette competence permet, a la fin d'un projet ou a la suite d'un jalon majeur, d
 ### Etape 1 : Localisation du Depot Central
 Le script detecte le depot central via la variable d'environnement `WORKFLOW_BASE_DIR` ou le chemin par defaut :
 ```bash
-python3 .agents/skills/distill-workflow/scripts/distill_workflow.py --help
+python3 .agents/skills/learn-global/scripts/distill_workflow.py --help
 ```
 
 ### Etape 2 : Analyse Comparative & Scan Anti-Fuite (Dry-Run)
 Executer la comparaison entre le projet local et la base centrale :
 ```bash
-python3 .agents/skills/distill-workflow/scripts/distill_workflow.py
+python3 .agents/skills/learn-global/scripts/distill_workflow.py
 ```
 - Verifier les avertissements de securite et de chemins absolus.
 - Inspecter les differences sur `.agents/agents/`, `AGENTS.md` et les scripts.
@@ -50,7 +50,7 @@ Invoquer `@researcher` via `invoke_subagent` pour evaluer si les modifications l
 ### Etape 4 : Application & Synchronisation vers la Base
 Appliquer les modifications validees et creer le commit dans le depot central :
 ```bash
-python3 .agents/skills/distill-workflow/scripts/distill_workflow.py --apply --sync-global
+python3 .agents/skills/learn-global/scripts/distill_workflow.py --apply --sync-global
 ```
 
 ### Etape 5 : Rapport Final de Distillation

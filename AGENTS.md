@@ -131,6 +131,7 @@ Le workflow intègre deux compétences natives (`skills`) sous forme de slash co
 
 | Compétence / Slash Command | Emplacement | Rôle & Périmètre |
 | :--- | :--- | :--- |
-| **`/project-introspection`** | `.agents/skills/project-introspection/` | **Introspection Locale** : Analyse les logs de conversation (`transcript.jsonl`), les directives et retours du manager, détecte les frictions et met à jour/crée les sous-agents du projet local (`.agents/agents/`). |
-| **`/distill-workflow`** | `.agents/skills/distill-workflow/` | **Distillation Globale & Règle Anti-Pollution** : En fin de projet, extrait les améliorations universelles (prompts, garde-fous QA, gouvernance) et met à jour le dépôt central du workflow (`/home/lyko/Dossier-perso/workflow`) sans aucune fuite de logique métier locale. |
+| **`/learn-local`** | `.agents/skills/learn-local/` | **Introspection Locale** : Analyse les logs de conversation (`transcript.jsonl`), les directives et retours du manager, détecte les frictions et met à jour/crée les sous-agents du projet local (`.agents/agents/`). |
+| **`/learn-global`** | `.agents/skills/learn-global/` | **Distillation Globale & Règle Anti-Pollution** : En fin de projet, extrait les améliorations universelles (prompts, garde-fous QA, gouvernance) et met à jour le dépôt central du workflow (`/home/lyko/Dossier-perso/workflow`) sans aucune fuite de logique métier locale. |
+
 
