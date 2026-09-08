@@ -61,23 +61,7 @@ Les deux stacks sont separees dans leurs sous-dossiers dedies :
 
 ---
 
-## 3. Demarrage des Sessions
-
-- **Sous OpenCode** :
-  ```bash
-  cd /chemin/vers/projet && opencode
-  ```
-  *Basculez entre le Mode Plan et le Mode Build avec `<Tab>`. Utilisez `/undo` ou `/redo` pour voyager dans le temps via les snapshots Git.*
-
-- **Sous Antigravity (AGY)** :
-  ```bash
-  cd /chemin/vers/projet && agy
-  ```
-  *Utilisez `/goal <mission>` pour lancer l'execution autonome supervisée.*
-
----
-
-## 4. Competences d'Amelioration Continue (Cycle "Learn")
+## 3. Competences d'Amelioration Continue (Cycle "Learn")
 
 Chaque stack dispose de commandes dediees pour l'introspection et la distillation :
 
@@ -92,7 +76,7 @@ Chaque stack dispose de commandes dediees pour l'introspection et la distillatio
 
 ---
 
-## 5. Structure Compartimentee du Depot
+## 4. Structure Compartimentee du Depot
 
 ```text
 workflow/
@@ -128,12 +112,3 @@ workflow/
 ├── README.fr.md                                  # Documentation francaise
 └── README.md                                     # English documentation (default)
 ```
-
----
-
-## 6. Outils & Prerequis
-
-- **Node.js & npx** : Fait tourner le serveur Playwright MCP (`@executeautomation/playwright-mcp-server`).
-- **OpenCode** : Installe via `curl -fsSL https://opencode.ai/install | bash`.
-- **Antigravity CLI (agy)** : CLI agentique Google DeepMind.
-- **Python 3** : Scripts d'analyse de session et distillation.

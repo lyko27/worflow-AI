@@ -61,23 +61,7 @@ Both stacks are isolated into their dedicated directories:
 
 ---
 
-## 3. Launching Sessions
-
-- **With OpenCode**:
-  ```bash
-  cd /path/to/project && opencode
-  ```
-  *Switch between Plan Mode and Build Mode with `<Tab>`. Use `/undo` and `/redo` to time-travel through Git snapshots.*
-
-- **With Antigravity (AGY)**:
-  ```bash
-  cd /path/to/project && agy
-  ```
-  *Use `/goal <prompt>` to run autonomous supervised missions.*
-
----
-
-## 4. Continuous Learning Skills ("Learn" Cycle)
+## 3. Continuous Learning Skills ("Learn" Cycle)
 
 Each stack has dedicated commands for introspection and distillation:
 
@@ -92,7 +76,7 @@ Each stack has dedicated commands for introspection and distillation:
 
 ---
 
-## 5. Compartmentalized Repository Structure
+## 4. Compartmentalized Repository Structure
 
 ```text
 workflow/
@@ -128,12 +112,3 @@ workflow/
 ├── README.fr.md                                  # French documentation
 └── README.md                                     # English documentation (default)
 ```
-
----
-
-## 6. Tools & Prerequisites
-
-- **Node.js & npx**: Runs Playwright MCP (`@executeautomation/playwright-mcp-server`).
-- **OpenCode**: Installed via `curl -fsSL https://opencode.ai/install | bash`.
-- **Antigravity CLI (agy)**: Google DeepMind agentic CLI.
-- **Python 3**: For test servers and workflow analysis scripts.
