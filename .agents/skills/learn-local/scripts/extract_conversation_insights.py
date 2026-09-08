@@ -10,9 +10,28 @@ project agent introspection and rule adaptations.
 import argparse
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+
+def sync_opencode_doc_submodule(repo_dir: Path) -> bool:
+    """Updates the docs/opencode git submodule if present."""
+    git_modules = repo_dir / ".gitmodules"
+    if git_modules.exists() and (repo_dir / ".git").exists():
+        try:
+            res = subprocess.run(
+                ["git", "submodule", "update", "--init", "--recursive", "--remote", "docs/opencode"],
+                cwd=repo_dir,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            return res.returncode == 0
+        except Exception:
+            return False
+    return False
 
 
 def find_latest_transcript_dir(app_data_dir: Path) -> Optional[Path]:
@@ -193,6 +212,8 @@ def main():
                         help="Path to Antigravity CLI app data directory")
     parser.add_argument("--json", action="store_true", help="Output raw JSON analysis")
     args = parser.parse_args()
+
+    sync_opencode_doc_submodule(Path.cwd())
 
     app_data_dir = Path(args.app_data_dir)
     transcript_path: Optional[Path] = None

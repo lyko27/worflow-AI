@@ -21,8 +21,9 @@ Cette competence permet d'analyser la conversation courante, les retours explici
 ## Protocole d'Execution pas a pas
 
 ### Etape 1 : Extraction des Signaux de la Conversation
-1. Executer le script d'analyse des logs :
+1. Synchroniser la documentation de reference et executer le script d'analyse :
    ```bash
+   git submodule update --init --recursive --remote docs/opencode 2>/dev/null || true
    python3 .agents/skills/learn-local/scripts/extract_conversation_insights.py
    ```
 2. Analyser les points saillants :

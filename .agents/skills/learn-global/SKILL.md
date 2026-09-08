@@ -34,8 +34,9 @@ python3 .agents/skills/learn-global/scripts/distill_workflow.py --help
 ```
 
 ### Etape 2 : Analyse Comparative & Scan Anti-Fuite (Dry-Run)
-Executer la comparaison entre le projet local et la base centrale :
+Synchroniser la documentation de reference et executer la comparaison entre le projet local et la base centrale :
 ```bash
+git submodule update --init --recursive --remote docs/opencode 2>/dev/null || true
 python3 .agents/skills/learn-global/scripts/distill_workflow.py
 ```
 - Verifier les avertissements de securite et de chemins absolus.
