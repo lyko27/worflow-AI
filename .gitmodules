@@ -1,0 +1,3 @@
+[submodule "docs/opencode"]
+	path = docs/opencode
+	url = https://github.com/bigsk1/opencode-doc.git
