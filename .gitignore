@@ -11,3 +11,9 @@ Thumbs.db
 screenshots/
 tmp/
 temp/
+
+# OpenCode temporary files, sessions & cache
+.opencode/logs/
+.opencode/cache/
+*.opencode-session*
+

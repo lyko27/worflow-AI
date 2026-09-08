@@ -1,90 +1,137 @@
 [🇫🇷 Lire en français](README.fr.md)
 
-# Multi-Agent Workflow — Antigravity CLI (AGY)
+# Dual-Stack Multi-Agent Workflow — OpenCode & Antigravity (AGY)
 
-Configuration and orchestration scripts to structure AI-assisted software development using **Antigravity CLI (AGY)**.
+Configuration, governance protocols, and orchestration scripts for AI-assisted software engineering using **OpenCode** and **Antigravity CLI (AGY)**.
 
-The goal of this workflow is to prevent common LLM pitfalls (hallucinated APIs, lack of planning, untested code) by enforcing a strict 4-step engineering cycle.
+The primary mission of this workflow is to prevent standard LLM pitfalls (API hallucinations, lack of planning, untested code, silent regressions) by enforcing a strict 4-step engineering lifecycle.
 
 ---
 
-### How It Works
+## 1. How It Works (4-Phase Cycle)
 
-The workflow uses a main agent (**Lead**) orchestrating 3 specialized subagents:
+The architecture is driven by a main agent (**Lead Architect / Coordinator**) supervising 4 specialized subagents:
 
 ```mermaid
 flowchart TD
-    Start([Task / Prompt]) --> P1[1. Research et Scoping\n@researcher]
-    P1 --> P2[2. Code Implementation\n@coder]
-    P2 --> P3[3. Visual Testing & QA\n@ui-tester + Playwright]
-    P3 --> P4{4. Final Review\nLead}
-    P4 -- Fixes if needed --> P2
+    Start([Task / Prompt]) --> P1[1. Research & Scoping\n@researcher in Plan Mode]
+    P1 -->|Spec Approved - Strict Barrier| FanOut{Parallel Fan-Out}
+    FanOut -->|Code Branch| P2A[2A. Code Implementation\n@coder in Build Mode]
+    FanOut -->|Pedagogy Branch| P2B[2B. Modeling & Theory\n@pedagogue]
+    P2A --> P3[3. Visual Testing & QA\n@ui-tester + Playwright MCP]
+    P2B --> P4
+    P3 --> P4{4. Final Review\nLead Architect}
+    P4 -- Fixes if needed --> P2A
     P4 -- Approved --> End([Done])
 ```
 
-1. **Research (`@researcher`)**: Inspects existing project files and checks official documentation before any code is written. The coder will not start until this research is validated.
-2. **Implementation (`@coder`)**: Writes clean, typed, modular code strictly following the phase 1 specification.
-3. **Tests & QA (`@ui-tester`)**: Runs real browser sessions via Playwright MCP, tests user flows, and takes screenshots (Desktop 1200px and Mobile 390px).
-4. **Validation (Lead)**: Inspects code changes and visual screenshots before completing the task.
+1. **Research (`@researcher`)**: Inspects official documentation and codebase in read-only mode. Coding is forbidden until this research is approved (**Sequential Barrier**).
+2. **Implementation (`@coder`)**: Writes clean, typed, modular code without hallucination, strictly adhering to the Phase 1 specification.
+3. **Formalization & Pedagogy (`@pedagogue`)**: Explains complex concepts, provides formal mathematical/algorithmic models, Mermaid architecture diagrams, and oral defense presentations.
+4. **Visual Testing & QA (`@ui-tester`)**: Pilots a real browser via Playwright MCP, tests interactions, and captures mandatory screenshots (**Desktop 1200px** and **Mobile 390px**).
+5. **Validation (Lead)**: Reviews Git diffs and inspects screenshots before marking the task complete.
 
 ---
 
-### Setup & Usage
+## 2. Dual-Stack Coexistence & Installation
 
-The `setup_agents.sh` script installs the agents and MCP configuration into any project directory or globally:
+This repository allows independent usage of **OpenCode**, **Antigravity (AGY)**, or both concurrently without interference.
 
+### Fast Unified Setup:
 ```bash
-# Make script executable
-chmod +x setup_agents.sh
+./setup_all.sh
+```
 
-# Install in current directory
-./setup_agents.sh
+### OpenCode Setup:
+```bash
+chmod +x setup_opencode.sh
+
+# Install in current project directory
+./setup_opencode.sh
 
 # Install in another project directory
-./setup_agents.sh /path/to/project
+./setup_opencode.sh /path/to/project
 
-# Install globally in ~/.gemini/config/
+# Install globally in ~/.config/opencode/
+./setup_opencode.sh --global
+```
+
+### Antigravity (AGY) Setup:
+```bash
+chmod +x setup_agents.sh
+./setup_agents.sh
+./setup_agents.sh /path/to/project
 ./setup_agents.sh --global
 ```
 
 ---
 
-### Continuous Improvement Skills
+## 3. Launching Sessions
 
-The workflow includes two built-in slash command skills for continuous learning:
+- **With OpenCode**:
+  ```bash
+  opencode
+  ```
+  *Switch between Plan Mode and Build Mode with `<Tab>`. Use `/undo` and `/redo` to time-travel through Git snapshots.*
 
-- **`/learn-local`**: Analyzes the active conversation logs (`transcript.jsonl`), user feedback, and friction points to adapt or create subagents for the **local project**.
-- **`/learn-global`**: At project completion, extracts **universal improvements** (prompts, QA checklists, governance rules) and syncs them to the **central workflow base** while strictly filtering out all project-specific logic or credentials.
+- **With Antigravity (AGY)**:
+  ```bash
+  agy
+  ```
+  *Use `/goal <prompt>` to run long-running autonomous tasks.*
 
 ---
 
-### Repository Structure
+## 4. Continuous Learning Skills ("Learn" Cycle)
+
+Both workflows include commands for introspection and distillation:
+
+- **`/learn-local`**:
+  - Automatically synchronizes the official OpenCode doc submodule (`git submodule update --remote docs/opencode`).
+  - Analyzes session logs to detect tool failures and user corrections.
+  - Adapts local subagent prompts and project configurations.
+- **`/learn-global`**:
+  - Automatically synchronizes `docs/opencode`.
+  - Runs leak-detection scans (strips secrets, tokens, and absolute paths).
+  - Distills and syncs universal improvements back to the central base workflow repository.
+
+---
+
+## 5. Repository Structure
 
 ```text
 workflow/
-├── .agents/
-│   ├── agents/
-│   │   ├── coder/agent.md                    # System prompt & tools for Coder subagent
-│   │   ├── researcher/agent.md               # System prompt & tools for Researcher subagent
-│   │   └── ui-tester/agent.md                # System prompt & tools for UI-Tester subagent
-│   ├── skills/
-│   │   ├── learn-local/SKILL.md              # Local conversation introspection skill
-│   │   └── learn-global/SKILL.md             # Global core workflow distillation skill
-│   └── mcp_config.json                       # Playwright MCP server configuration
-├── AGENTS.md                                 # Governance protocol and 4-phase details
-├── documentation_agy.md                      # Antigravity CLI reference documentation
-├── setup_agents.sh                           # Automated deployment script
+├── .agents/                                      # Antigravity CLI (AGY) Stack
+│   ├── agents/                                   # Agy subagents (coder, researcher, ui-tester, pedagogue)
+│   ├── skills/                                   # Agy skills (learn-local, learn-global)
+│   └── mcp_config.json                           # Playwright MCP configuration for Agy
+├── .opencode/                                    # OpenCode Stack
+│   ├── opencode.json                             # OpenCode configuration (official schema)
+│   ├── AGENTS.md                                 # OpenCode governance protocol & rules
+│   ├── agents/                                   # OpenCode subagents (coder.md, researcher.md, etc.)
+│   ├── command/                                  # OpenCode slash commands (/learn-local, /learn-global)
+│   └── skills/                                   # Python introspection & distillation scripts
+├── docs/
+│   └── opencode/                                 # [Git Submodule] Official OpenCode documentation
+├── AGENTS.md                                     # Original Agy governance protocol
+├── documentation_agy.md                          # Antigravity CLI technical guide
+├── documentation_opencode.md                     # OpenCode CLI technical guide
+├── opencode.json                                 # Root OpenCode configuration
+├── setup_agents.sh                               # Agy setup script
+├── setup_opencode.sh                             # OpenCode setup script
+├── setup_all.sh                                  # Unified interactive selector
+├── .gitmodules                                   # Definition of docs/opencode submodule
 ├── .gitignore
 ├── LICENSE
-├── README.fr.md                              # French documentation
-└── README.md                                 # English documentation (default)
+├── README.fr.md                                  # French documentation
+└── README.md                                     # English documentation (default)
 ```
 
 ---
 
-### Tools & Prerequisites
+## 6. Tools & Prerequisites
 
-- **Node.js & npx**: Runs the Playwright MCP server (`@executeautomation/playwright-mcp-server`) on demand.
+- **Node.js & npx**: Runs Playwright MCP (`@executeautomation/playwright-mcp-server`).
+- **OpenCode**: Installed via `curl -fsSL https://opencode.ai/install | bash`.
 - **Antigravity CLI (agy)**: Google DeepMind agentic CLI.
-- **Python 3**: Used for local test servers and workflow analysis scripts.
-
+- **Python 3**: For test servers and workflow analysis scripts.
