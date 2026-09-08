@@ -106,8 +106,9 @@ fi
 # 2. Synchronisation du sous-module Git de documentation
 echo ""
 echo -e "${BLUE}[2/5] Initialisation et synchronisation de la documentation OpenCode (docs/opencode)...${NC}"
-if [ -d "${SCRIPT_DIR}/.git" ] && [ -f "${SCRIPT_DIR}/.gitmodules" ]; then
-    if git -C "${SCRIPT_DIR}" submodule update --init --recursive docs/opencode >/dev/null 2>&1; then
+REPO_ROOT="$(cd "${SCRIPT_DIR}" && git rev-parse --show-toplevel 2>/dev/null || echo "${SCRIPT_DIR}")"
+if [ -d "${REPO_ROOT}/.git" ] && [ -f "${REPO_ROOT}/.gitmodules" ]; then
+    if git -C "${REPO_ROOT}" submodule update --init --recursive docs/opencode >/dev/null 2>&1; then
         echo -e "  ${GREEN}[OK]${NC} Sous-module docs/opencode synchronise avec succes."
     else
         echo -e "  ${YELLOW}[INFO] Note: Sous-module docs/opencode non modifie ou acces reseau differe.${NC}"

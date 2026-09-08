@@ -1,16 +1,18 @@
 [🇫🇷 Lire en français](README.fr.md)
 
-# Dual-Stack Multi-Agent Workflow — OpenCode & Antigravity (AGY)
+# Compartmentalized Multi-Agent Workflows — OpenCode & Antigravity (AGY)
 
-Configuration, governance protocols, and orchestration scripts for AI-assisted software engineering using **OpenCode** and **Antigravity CLI (AGY)**.
+This repository provides **two strictly compartmentalized, independent AI software engineering stacks**:
+1. **`workflows/opencode/`**: Native **OpenCode** stack (terminal TUI, model agnostic, Git `/undo` / `/redo` snapshots, slash commands).
+2. **`workflows/agy/`**: Native **Antigravity CLI (AGY)** stack (Google DeepMind agentic multi-agent orchestration).
 
-The primary mission of this workflow is to prevent standard LLM pitfalls (API hallucinations, lack of planning, untested code, silent regressions) by enforcing a strict 4-step engineering lifecycle.
+The primary mission of both workflows is to prevent standard LLM pitfalls (API hallucinations, lack of planning, untested code, silent regressions) by enforcing a strict 4-step engineering lifecycle.
 
 ---
 
 ## 1. How It Works (4-Phase Cycle)
 
-The architecture is driven by a main agent (**Lead Architect / Coordinator**) supervising 4 specialized subagents:
+Each stack is driven by a main agent (**Lead Architect / Coordinator**) supervising 4 specialized subagents:
 
 ```mermaid
 flowchart TD
@@ -33,36 +35,29 @@ flowchart TD
 
 ---
 
-## 2. Dual-Stack Coexistence & Installation
+## 2. Compartmentalized Architecture & Deployment
 
-This repository allows independent usage of **OpenCode**, **Antigravity (AGY)**, or both concurrently without interference.
+Both stacks are isolated into their dedicated directories:
 
-### Fast Unified Setup:
+### Quick Deployment via Root Script:
 ```bash
-./setup_all.sh
+# OpenCode deployment
+./setup.sh opencode                     # in current directory
+./setup.sh opencode /path/to/project    # in a specific target project
+./setup.sh opencode --global            # globally in ~/.config/opencode/
+
+# Antigravity (AGY) deployment
+./setup.sh agy                          # in current directory
+./setup.sh agy /path/to/project         # in a specific target project
+./setup.sh agy --global                 # globally in ~/.gemini/config/
+
+# Interactive menu
+./setup.sh
 ```
 
-### OpenCode Setup:
-```bash
-chmod +x setup_opencode.sh
-
-# Install in current project directory
-./setup_opencode.sh
-
-# Install in another project directory
-./setup_opencode.sh /path/to/project
-
-# Install globally in ~/.config/opencode/
-./setup_opencode.sh --global
-```
-
-### Antigravity (AGY) Setup:
-```bash
-chmod +x setup_agents.sh
-./setup_agents.sh
-./setup_agents.sh /path/to/project
-./setup_agents.sh --global
-```
+### Direct Deployment from Workflow Folders:
+- **OpenCode**: `./workflows/opencode/setup_opencode.sh [TARGET_DIR]`
+- **Antigravity (AGY)**: `./workflows/agy/setup_agents.sh [TARGET_DIR]`
 
 ---
 
@@ -70,21 +65,21 @@ chmod +x setup_agents.sh
 
 - **With OpenCode**:
   ```bash
-  opencode
+  cd /path/to/project && opencode
   ```
   *Switch between Plan Mode and Build Mode with `<Tab>`. Use `/undo` and `/redo` to time-travel through Git snapshots.*
 
 - **With Antigravity (AGY)**:
   ```bash
-  agy
+  cd /path/to/project && agy
   ```
-  *Use `/goal <prompt>` to run long-running autonomous tasks.*
+  *Use `/goal <prompt>` to run autonomous supervised missions.*
 
 ---
 
 ## 4. Continuous Learning Skills ("Learn" Cycle)
 
-Both workflows include commands for introspection and distillation:
+Each stack has dedicated commands for introspection and distillation:
 
 - **`/learn-local`**:
   - Automatically synchronizes the official OpenCode doc submodule (`git submodule update --remote docs/opencode`).
@@ -93,33 +88,40 @@ Both workflows include commands for introspection and distillation:
 - **`/learn-global`**:
   - Automatically synchronizes `docs/opencode`.
   - Runs leak-detection scans (strips secrets, tokens, and absolute paths).
-  - Distills and syncs universal improvements back to the central base workflow repository.
+  - Distills and syncs universal improvements back to the respective workflow directory (`workflows/opencode/` or `workflows/agy/`).
 
 ---
 
-## 5. Repository Structure
+## 5. Compartmentalized Repository Structure
 
 ```text
 workflow/
-├── .agents/                                      # Antigravity CLI (AGY) Stack
-│   ├── agents/                                   # Agy subagents (coder, researcher, ui-tester, pedagogue)
-│   ├── skills/                                   # Agy skills (learn-local, learn-global)
-│   └── mcp_config.json                           # Playwright MCP configuration for Agy
-├── .opencode/                                    # OpenCode Stack
-│   ├── opencode.json                             # OpenCode configuration (official schema)
-│   ├── AGENTS.md                                 # OpenCode governance protocol & rules
-│   ├── agents/                                   # OpenCode subagents (coder.md, researcher.md, etc.)
-│   ├── command/                                  # OpenCode slash commands (/learn-local, /learn-global)
-│   └── skills/                                   # Python introspection & distillation scripts
+├── workflows/
+│   ├── agy/                                      # Dedicated Antigravity CLI (AGY) Stack
+│   │   ├── .agents/
+│   │   │   ├── agents/                           # coder, researcher, ui-tester, pedagogue
+│   │   │   ├── skills/                           # learn-local, learn-global
+│   │   │   └── mcp_config.json                   # Playwright MCP configuration
+│   │   ├── AGENTS.md                             # Agy governance protocol
+│   │   ├── documentation_agy.md                  # Comprehensive Agy reference guide
+│   │   └── setup_agents.sh                       # Agy setup script
+│   │
+│   └── opencode/                                 # Dedicated OpenCode Stack
+│       ├── .opencode/
+│       │   ├── opencode.json                     # OpenCode configuration (official schema)
+│       │   ├── AGENTS.md                         # OpenCode governance protocol
+│       │   ├── agents/                           # coder.md, researcher.md, etc.
+│       │   ├── command/                          # /learn-local.md, /learn-global.md
+│       │   └── skills/                           # Python introspection & distillation scripts
+│       ├── opencode.json                         # Root mirror OpenCode configuration
+│       ├── documentation_opencode.md             # Comprehensive OpenCode reference guide
+│       └── setup_opencode.sh                     # OpenCode setup script
+│
 ├── docs/
 │   └── opencode/                                 # [Git Submodule] Official OpenCode documentation
-├── AGENTS.md                                     # Original Agy governance protocol
-├── documentation_agy.md                          # Antigravity CLI technical guide
-├── documentation_opencode.md                     # OpenCode CLI technical guide
-├── opencode.json                                 # Root OpenCode configuration
-├── setup_agents.sh                               # Agy setup script
-├── setup_opencode.sh                             # OpenCode setup script
-├── setup_all.sh                                  # Unified interactive selector
+├── scripts/
+│   └── verify_dual_stack.py                      # Integrity test suite
+├── setup.sh                                      # Universal root setup script
 ├── .gitmodules                                   # Definition of docs/opencode submodule
 ├── .gitignore
 ├── LICENSE

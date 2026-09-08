@@ -2,10 +2,11 @@
 """
 verify_dual_stack.py
 
-Automated test suite verifying the integrity of the dual-stack architecture:
-1. Antigravity (AGY) workflow integrity and non-regression
-2. OpenCode documentation git submodule and learn sync
-3. OpenCode stack configuration, schema, agent frontmatters and commands
+Automated test suite verifying the integrity of the compartmentalized architecture:
+1. Antigravity (AGY) workflow in workflows/agy/
+2. OpenCode documentation git submodule in docs/opencode/
+3. OpenCode workflow in workflows/opencode/
+4. Top-level deployment script setup.sh
 """
 
 import json
@@ -35,14 +36,14 @@ def record_result(name: str, success: bool, details: str = ""):
 
 
 print("==================================================================")
-print(" SUITE DE VERIFICATION & TESTS DE NON-REGRESSION DUAL-STACK")
+print(" SUITE DE VERIFICATION DES STACKS COMPARTIMENTEES (AGY & OPENCODE)")
 print("==================================================================")
 print(f"Racine du projet : {REPO_ROOT}\n")
 
-# --- SECTION 1 : VERIFICATION AGY (NON-REGRESSION) ---
-print("[1/3] Verification de l'integrite du workflow Antigravity (AGY)...")
+# --- SECTION 1 : WORKFLOW ANTIGRAVITY (AGY) COMPARTIMENTE ---
+print("[1/4] Verification du workflow Antigravity (workflows/agy/)...")
+agy_dir = REPO_ROOT / "workflows" / "agy"
 
-# 1.1 Fichiers essentiels
 agy_files = [
     "AGENTS.md",
     "documentation_agy.md",
@@ -57,47 +58,43 @@ agy_files = [
     ".agents/skills/learn-local/scripts/extract_conversation_insights.py",
     ".agents/skills/learn-global/scripts/distill_workflow.py",
 ]
-missing_agy = [f for f in agy_files if not (REPO_ROOT / f).exists()]
-record_result("Fichiers fondamentaux Agy presents", len(missing_agy) == 0, f"Manquants : {missing_agy}" if missing_agy else "")
+missing_agy = [f for f in agy_files if not (agy_dir / f).exists()]
+record_result("Fichiers fondamentaux Agy presents dans workflows/agy/", len(missing_agy) == 0, f"Manquants : {missing_agy}" if missing_agy else "")
 
-# 1.2 Execution setup_agents.sh --help
 try:
-    res = subprocess.run([str(REPO_ROOT / "setup_agents.sh"), "--help"], capture_output=True, text=True, cwd=REPO_ROOT)
-    record_result("Script setup_agents.sh executable et valide", res.returncode == 0)
+    res = subprocess.run([str(agy_dir / "setup_agents.sh"), "--help"], capture_output=True, text=True, cwd=agy_dir)
+    record_result("Script workflows/agy/setup_agents.sh operationnel", res.returncode == 0)
 except Exception as e:
-    record_result("Script setup_agents.sh executable et valide", False, str(e))
+    record_result("Script workflows/agy/setup_agents.sh operationnel", False, str(e))
 
-# 1.3 Execution dry-run distill_workflow.py Agy
 try:
     res = subprocess.run(
-        [sys.executable, str(REPO_ROOT / ".agents/skills/learn-global/scripts/distill_workflow.py"), "--source-dir", str(REPO_ROOT)],
-        capture_output=True, text=True, cwd=REPO_ROOT
+        [sys.executable, str(agy_dir / ".agents/skills/learn-global/scripts/distill_workflow.py"), "--source-dir", str(agy_dir)],
+        capture_output=True, text=True, cwd=agy_dir
     )
     record_result("Script learn-global Agy operationnel", res.returncode == 0, res.stderr.strip() if res.returncode != 0 else "")
 except Exception as e:
     record_result("Script learn-global Agy operationnel", False, str(e))
 
-# --- SECTION 2 : VERIFICATION SOUS-MODULE DOCUMENTATION OPENCODE ---
-print("\n[2/3] Verification de la documentation OpenCode & synchronisation...")
-
+# --- SECTION 2 : SOUS-MODULE DOCUMENTATION OPENCODE ---
+print("\n[2/4] Verification de la documentation OpenCode (docs/opencode)...")
 doc_readme = REPO_ROOT / "docs" / "opencode" / "README.md"
 has_doc = doc_readme.exists() and doc_readme.stat().st_size > 1000
 record_result("Documentation docs/opencode/README.md presente et lisible", has_doc, f"Taille : {doc_readme.stat().st_size if doc_readme.exists() else 0} octets")
 
-# 2.2 Test commande de mise a jour du sous-module
 try:
     res = subprocess.run(["git", "submodule", "status", "docs/opencode"], capture_output=True, text=True, cwd=REPO_ROOT)
     record_result("Sous-module docs/opencode enregistre dans git", res.returncode == 0 and "docs/opencode" in res.stdout)
 except Exception as e:
     record_result("Sous-module docs/opencode enregistre dans git", False, str(e))
 
-# --- SECTION 3 : VERIFICATION STACK OPENCODE ---
-print("\n[3/3] Verification de la stack native OpenCode...")
+# --- SECTION 3 : WORKFLOW OPENCODE COMPARTIMENTE ---
+print("\n[3/4] Verification du workflow OpenCode (workflows/opencode/)...")
+oc_dir = REPO_ROOT / "workflows" / "opencode"
 
-# 3.1 Validation syntaxe JSON opencode.json
 json_valid = True
 json_errors = []
-for jf in [REPO_ROOT / ".opencode" / "opencode.json", REPO_ROOT / "opencode.json"]:
+for jf in [oc_dir / ".opencode" / "opencode.json", oc_dir / "opencode.json"]:
     if not jf.exists():
         json_valid = False
         json_errors.append(f"Fichier absent: {jf.name}")
@@ -112,35 +109,30 @@ for jf in [REPO_ROOT / ".opencode" / "opencode.json", REPO_ROOT / "opencode.json
         json_valid = False
         json_errors.append(f"Erreur JSON dans {jf.name}: {e}")
 
-record_result("Syntaxe et structure des fichiers opencode.json", json_valid, ", ".join(json_errors))
+record_result("Validite des configurations opencode.json dans workflows/opencode/", json_valid, ", ".join(json_errors))
 
-# 3.2 Verification des frontmatters des agents OpenCode
 agents = ["coder.md", "researcher.md", "ui-tester.md", "pedagogue.md"]
 agents_valid = True
 agent_errs = []
 for ag in agents:
-    p = REPO_ROOT / ".opencode" / "agents" / ag
+    p = oc_dir / ".opencode" / "agents" / ag
     if not p.exists():
         agents_valid = False
         agent_errs.append(f"Agent manquant: {ag}")
         continue
     with open(p, "r", encoding="utf-8") as f:
         txt = f.read()
-    if not txt.startswith("---"):
+    if not txt.startswith("---") or "mode: subagent" not in txt:
         agents_valid = False
-        agent_errs.append(f"Frontmatter manquant: {ag}")
-    if "mode: subagent" not in txt:
-        agents_valid = False
-        agent_errs.append(f"mode: subagent manquant: {ag}")
+        agent_errs.append(f"Frontmatter non conforme: {ag}")
 
-record_result("Frontmatters des sous-agents OpenCode conformes", agents_valid, ", ".join(agent_errs))
+record_result("Sous-agents OpenCode presents et valides", agents_valid, ", ".join(agent_errs))
 
-# 3.3 Verification des commandes slash
 commands = ["learn-local.md", "learn-global.md"]
 cmd_valid = True
 cmd_errs = []
 for c in commands:
-    p = REPO_ROOT / ".opencode" / "command" / c
+    p = oc_dir / ".opencode" / "command" / c
     if not p.exists():
         cmd_valid = False
         cmd_errs.append(f"Commande manquante: {c}")
@@ -151,33 +143,51 @@ for c in commands:
         cmd_valid = False
         cmd_errs.append(f"Auto-sync manquant dans {c}")
 
-record_result("Commandes slash OpenCode avec synchronisation submodule", cmd_valid, ", ".join(cmd_errs))
+record_result("Commandes slash OpenCode avec auto-sync doc", cmd_valid, ", ".join(cmd_errs))
 
-# 3.4 Verification de setup_opencode.sh et setup_all.sh
 try:
-    res_oc = subprocess.run([str(REPO_ROOT / "setup_opencode.sh"), "--help"], capture_output=True, text=True, cwd=REPO_ROOT)
-    record_result("Script setup_opencode.sh operationnel", res_oc.returncode == 0)
+    res_oc = subprocess.run([str(oc_dir / "setup_opencode.sh"), "--help"], capture_output=True, text=True, cwd=oc_dir)
+    record_result("Script workflows/opencode/setup_opencode.sh operationnel", res_oc.returncode == 0)
 except Exception as e:
-    record_result("Script setup_opencode.sh operationnel", False, str(e))
+    record_result("Script workflows/opencode/setup_opencode.sh operationnel", False, str(e))
 
-# 3.5 Test dry-run des scripts learn OpenCode
 try:
     res_ins = subprocess.run(
-        [sys.executable, str(REPO_ROOT / ".opencode/skills/learn-local/scripts/extract_conversation_insights.py"), "--project-dir", str(REPO_ROOT)],
-        capture_output=True, text=True, cwd=REPO_ROOT
+        [sys.executable, str(oc_dir / ".opencode/skills/learn-local/scripts/extract_conversation_insights.py"), "--project-dir", str(oc_dir)],
+        capture_output=True, text=True, cwd=oc_dir
     )
-    record_result("Script extract_conversation_insights OpenCode operationnel", res_ins.returncode == 0, res_ins.stderr.strip() if res_ins.returncode != 0 else "")
+    record_result("Script learn-local OpenCode operationnel", res_ins.returncode == 0, res_ins.stderr.strip() if res_ins.returncode != 0 else "")
 except Exception as e:
-    record_result("Script extract_conversation_insights OpenCode operationnel", False, str(e))
+    record_result("Script learn-local OpenCode operationnel", False, str(e))
 
 try:
     res_dis = subprocess.run(
-        [sys.executable, str(REPO_ROOT / ".opencode/skills/learn-global/scripts/distill_workflow.py"), "--source-dir", str(REPO_ROOT)],
-        capture_output=True, text=True, cwd=REPO_ROOT
+        [sys.executable, str(oc_dir / ".opencode/skills/learn-global/scripts/distill_workflow.py"), "--source-dir", str(oc_dir)],
+        capture_output=True, text=True, cwd=oc_dir
     )
-    record_result("Script distill_workflow OpenCode operationnel", res_dis.returncode == 0, res_dis.stderr.strip() if res_dis.returncode != 0 else "")
+    record_result("Script learn-global OpenCode operationnel", res_dis.returncode == 0, res_dis.stderr.strip() if res_dis.returncode != 0 else "")
 except Exception as e:
-    record_result("Script distill_workflow OpenCode operationnel", False, str(e))
+    record_result("Script learn-global OpenCode operationnel", False, str(e))
+
+# --- SECTION 4 : SCRIPT RACINE UNIFIE (setup.sh) ---
+print("\n[4/4] Verification du script d'installation racine (setup.sh)...")
+try:
+    res_root = subprocess.run([str(REPO_ROOT / "setup.sh"), "--help"], capture_output=True, text=True, cwd=REPO_ROOT)
+    record_result("Script racine setup.sh operationnel (--help)", res_root.returncode == 0)
+except Exception as e:
+    record_result("Script racine setup.sh operationnel (--help)", False, str(e))
+
+try:
+    res_root_oc = subprocess.run([str(REPO_ROOT / "setup.sh"), "opencode", "--help"], capture_output=True, text=True, cwd=REPO_ROOT)
+    record_result("Delegation setup.sh opencode --help", res_root_oc.returncode == 0)
+except Exception as e:
+    record_result("Delegation setup.sh opencode --help", False, str(e))
+
+try:
+    res_root_agy = subprocess.run([str(REPO_ROOT / "setup.sh"), "agy", "--help"], capture_output=True, text=True, cwd=REPO_ROOT)
+    record_result("Delegation setup.sh agy --help", res_root_agy.returncode == 0)
+except Exception as e:
+    record_result("Delegation setup.sh agy --help", False, str(e))
 
 # --- BILAN FINAL ---
 print("\n==================================================================")
@@ -187,5 +197,5 @@ print("==================================================================")
 if failed_tests > 0:
     sys.exit(1)
 else:
-    print("Succes : Toutes les verifications de compatibilite et non-regression ont reussi.")
+    print("Succes : Architecture compartimentee 100% validee.")
     sys.exit(0)

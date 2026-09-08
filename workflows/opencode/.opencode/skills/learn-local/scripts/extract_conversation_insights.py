@@ -20,14 +20,20 @@ from typing import Any, Dict, List, Optional
 
 def sync_opencode_doc_submodule(repo_dir: Path) -> bool:
     """Updates the docs/opencode git submodule to the latest remote state."""
-    git_modules = repo_dir / ".gitmodules"
-    doc_submodule = repo_dir / "docs" / "opencode"
-    if git_modules.exists() and (repo_dir / ".git").exists():
+    curr = repo_dir.resolve()
+    git_root = None
+    while curr != curr.parent:
+        if (curr / ".gitmodules").exists() and (curr / ".git").exists():
+            git_root = curr
+            break
+        curr = curr.parent
+
+    if git_root:
         try:
             print("[SYNC] Verification et mise a jour du sous-module docs/opencode...")
             res = subprocess.run(
                 ["git", "submodule", "update", "--init", "--recursive", "--remote", "docs/opencode"],
-                cwd=repo_dir,
+                cwd=git_root,
                 capture_output=True,
                 text=True,
                 timeout=30

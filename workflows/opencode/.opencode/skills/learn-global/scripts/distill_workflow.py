@@ -2,12 +2,13 @@
 """
 distill_workflow.py
 
-Distills universal, domain-agnostic workflow improvements from a completed
-or active project and synchronizes them cleanly to the central base workflow
-repository (and optionally ~/.gemini/config/).
+Distills universal, domain-agnostic workflow improvements from an OpenCode
+project and synchronizes them cleanly to the central base workflow repository
+(and optionally ~/.config/opencode/).
 
 Ensures strict sanitization to prevent project-specific logic, absolute paths,
 or proprietary business domain rules from polluting the base workflow.
+Automatically ensures the docs/opencode git submodule is updated.
 """
 
 import argparse
@@ -26,7 +27,6 @@ DEFAULT_BASE_DIR = os.environ.get(
     "/home/lyko/Dossier-perso/workflow"
 )
 
-# Patterns that indicate project-specific data that must NOT leak to base workflow
 SENSITIVE_PATTERNS = [
     r"api[_-]?key\s*[:=]\s*['\"][^'\"]+['\"]",
     r"bearer\s+[a-zA-Z0-9_\-\.]{15,}",
@@ -37,20 +37,32 @@ SENSITIVE_PATTERNS = [
 
 
 def sync_opencode_doc_submodule(repo_dir: Path) -> bool:
-    """Updates the docs/opencode git submodule if present."""
-    git_modules = repo_dir / ".gitmodules"
-    if git_modules.exists() and (repo_dir / ".git").exists():
+    """Updates the docs/opencode git submodule to the latest remote state."""
+    curr = repo_dir.resolve()
+    git_root = None
+    while curr != curr.parent:
+        if (curr / ".gitmodules").exists() and (curr / ".git").exists():
+            git_root = curr
+            break
+        curr = curr.parent
+
+    if git_root:
         try:
+            print("[SYNC] Synchronisation prealable de la documentation OpenCode...")
             res = subprocess.run(
                 ["git", "submodule", "update", "--init", "--recursive", "--remote", "docs/opencode"],
-                cwd=repo_dir,
+                cwd=git_root,
                 capture_output=True,
                 text=True,
                 timeout=30
             )
-            return res.returncode == 0
-        except Exception:
-            return False
+            if res.returncode == 0:
+                print("  [OK] Documentation OpenCode a jour.")
+                return True
+            else:
+                print(f"  [WARN] Note sync submodule: {res.stderr.strip()}")
+        except Exception as e:
+            print(f"  [WARN] Echec de mise a jour du sous-module: {e}")
     return False
 
 
@@ -61,13 +73,20 @@ def detect_base_repository(explicit_path: Optional[str] = None) -> Path:
     else:
         base_path = Path(DEFAULT_BASE_DIR).expanduser().resolve()
 
+    # If pointing to root of repo, check for workflows/opencode subdirectory
+    if (base_path / "workflows" / "opencode").exists():
+        base_path = base_path / "workflows" / "opencode"
+
     if not base_path.exists():
         raise FileNotFoundError(f"Central workflow directory not found: {base_path}")
-    
+
+    # Check for OpenCode signature
+    opencode_dir = base_path / ".opencode"
     agents_md = base_path / "AGENTS.md"
-    setup_sh = base_path / "setup_agents.sh"
-    if not (agents_md.exists() or setup_sh.exists()):
-        raise ValueError(f"Directory {base_path} does not appear to be a valid Antigravity workflow base.")
+    setup_sh = base_path / "setup_opencode.sh"
+    opencode_json = base_path / "opencode.json"
+    if not (opencode_dir.exists() or agents_md.exists() or setup_sh.exists() or opencode_json.exists()):
+        raise ValueError(f"Directory {base_path} does not appear to be a valid OpenCode workflow repository.")
 
     return base_path
 
@@ -79,20 +98,19 @@ def sanitize_content(content: str, source_dir: Path, base_dir: Path) -> Tuple[st
     for pattern in SENSITIVE_PATTERNS:
         matches = re.findall(pattern, content, re.IGNORECASE)
         if matches:
-            warnings.append(f"Potential secret/sensitive token detected: {matches[0][:20]}...")
+            warnings.append(f"Detecte jeton/secret potentiel: {matches[0][:20]}...")
 
-    # Replace local absolute workspace paths with generic placeholders if source differs from base
     if source_dir.resolve() != base_dir.resolve():
         proj_path_str = str(source_dir.resolve())
         if proj_path_str in content:
             content = content.replace(proj_path_str, "<PROJECT_ROOT>")
-            warnings.append(f"Replaced local absolute path '{proj_path_str}' with '<PROJECT_ROOT>'.")
+            warnings.append(f"Chemin absolu remplace par '<PROJECT_ROOT>'.")
 
     return content, warnings
 
 
 def compare_and_distill_files(source_dir: Path, base_dir: Path) -> Dict[str, Any]:
-    """Compares local .agents and AGENTS.md with base workflow repo."""
+    """Compares local .opencode files with base workflow repository."""
     results = {
         "identical": [],
         "modified": [],
@@ -100,25 +118,18 @@ def compare_and_distill_files(source_dir: Path, base_dir: Path) -> Dict[str, Any
         "warnings": []
     }
 
-    relative_files_to_check = [
-        Path("AGENTS.md"),
-        Path(".agents/mcp_config.json"),
-    ]
+    relative_files_to_check: List[Path] = []
 
-    # Add all subagent definitions
-    source_agents_dir = source_dir / ".agents" / "agents"
-    if source_agents_dir.exists():
-        for agent_file in source_agents_dir.rglob("*.md"):
-            rel_path = agent_file.relative_to(source_dir)
-            relative_files_to_check.append(rel_path)
+    # Check .opencode directory elements
+    source_oc = source_dir / ".opencode"
+    if source_oc.exists():
+        for f in source_oc.rglob("*"):
+            if f.is_file() and not f.name.startswith("."):
+                relative_files_to_check.append(f.relative_to(source_dir))
 
-    # Add all skill definitions
-    source_skills_dir = source_dir / ".agents" / "skills"
-    if source_skills_dir.exists():
-        for skill_file in source_skills_dir.rglob("*"):
-            if skill_file.is_file():
-                rel_path = skill_file.relative_to(source_dir)
-                relative_files_to_check.append(rel_path)
+    # Also check root configuration if present
+    if (source_dir / "opencode.json").exists():
+        relative_files_to_check.append(Path("opencode.json"))
 
     for rel_path in relative_files_to_check:
         source_file = source_dir / rel_path
@@ -131,7 +142,7 @@ def compare_and_distill_files(source_dir: Path, base_dir: Path) -> Dict[str, Any
             with open(source_file, "r", encoding="utf-8", errors="replace") as sf:
                 source_content = sf.read()
         except OSError as e:
-            results["warnings"].append(f"Could not read {source_file}: {e}")
+            results["warnings"].append(f"Impossible de lire {source_file}: {e}")
             continue
 
         sanitized_content, file_warnings = sanitize_content(source_content, source_dir, base_dir)
@@ -148,7 +159,7 @@ def compare_and_distill_files(source_dir: Path, base_dir: Path) -> Dict[str, Any
                 with open(base_file, "r", encoding="utf-8", errors="replace") as bf:
                     base_content = bf.read()
             except OSError as e:
-                results["warnings"].append(f"Could not read base file {base_file}: {e}")
+                results["warnings"].append(f"Impossible de lire le fichier de base {base_file}: {e}")
                 continue
 
             if sanitized_content == base_content:
@@ -192,125 +203,122 @@ def apply_distillation(diff_results: Dict[str, Any], base_dir: Path, commit_msg:
 
     if applied_files and (base_dir / ".git").exists():
         try:
-            # Stage updated files
             subprocess.run(["git", "add"] + applied_files, cwd=base_dir, check=True, capture_output=True)
-            
-            # Check if there are staged changes
             status_out = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=base_dir)
             if status_out.returncode != 0:
-                default_msg = f"feat(workflow): distillation des ameliorations du workflow ({len(applied_files)} fichiers)"
+                default_msg = f"feat(workflow): distillation des ameliorations opencode ({len(applied_files)} fichiers)"
                 msg = commit_msg or default_msg
                 subprocess.run(["git", "commit", "-m", msg], cwd=base_dir, check=True, capture_output=True)
         except subprocess.SubprocessError as e:
-            print(f"Warning: Git commit in base repo failed: {e}", file=sys.stderr)
+            print(f"Attention : echec du commit git dans le depot central: {e}", file=sys.stderr)
 
     return applied_files
 
 
-def sync_to_global_config(base_dir: Path, global_config_dir: Path) -> List[str]:
-    """Optionally syncs base agents and skills to ~/.gemini/config/."""
+def sync_to_global_opencode(base_dir: Path, global_config_dir: Path) -> List[str]:
+    """Syncs base OpenCode configuration to ~/.config/opencode/."""
     synced = []
-    if not global_config_dir.exists():
+    global_config_dir.mkdir(parents=True, exist_ok=True)
+
+    base_oc = base_dir / ".opencode"
+    if not base_oc.exists():
         return synced
 
-    # Sync agents
-    base_agents = base_dir / ".agents" / "agents"
-    target_agents = global_config_dir / "agents"
-    if base_agents.exists():
-        target_agents.mkdir(parents=True, exist_ok=True)
-        for agent_file in base_agents.rglob("*.md"):
-            rel = agent_file.relative_to(base_agents)
-            dest = target_agents / rel
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            with open(agent_file, "r", encoding="utf-8") as src, open(dest, "w", encoding="utf-8") as dst:
-                dst.write(src.read())
-            synced.append(f"agents/{rel}")
+    # Copy config
+    base_json = base_oc / "opencode.json"
+    if base_json.exists():
+        dest_json = global_config_dir / "opencode.json"
+        with open(base_json, "r", encoding="utf-8") as src, open(dest_json, "w", encoding="utf-8") as dst:
+            dst.write(src.read())
+        synced.append("opencode.json")
 
-    # Sync skills
-    base_skills = base_dir / ".agents" / "skills"
-    target_skills = global_config_dir / "skills"
-    if base_skills.exists():
-        target_skills.mkdir(parents=True, exist_ok=True)
-        for skill_file in base_skills.rglob("*"):
-            if skill_file.is_file():
-                rel = skill_file.relative_to(base_skills)
-                dest = target_skills / rel
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                with open(skill_file, "r", encoding="utf-8", errors="replace") as src, open(dest, "w", encoding="utf-8") as dst:
-                    dst.write(src.read())
-                synced.append(f"skills/{rel}")
+    # Copy agents
+    base_agents = base_oc / "agents"
+    if base_agents.exists():
+        target_agents = global_config_dir / "agents"
+        target_agents.mkdir(parents=True, exist_ok=True)
+        for af in base_agents.glob("*.md"):
+            dest = target_agents / af.name
+            with open(af, "r", encoding="utf-8") as src, open(dest, "w", encoding="utf-8") as dst:
+                dst.write(src.read())
+            synced.append(f"agents/{af.name}")
+
+    # Copy commands
+    base_cmd = base_oc / "command"
+    if base_cmd.exists():
+        target_cmd = global_config_dir / "command"
+        target_cmd.mkdir(parents=True, exist_ok=True)
+        for cf in base_cmd.glob("*.md"):
+            dest = target_cmd / cf.name
+            with open(cf, "r", encoding="utf-8") as src, open(dest, "w", encoding="utf-8") as dst:
+                dst.write(src.read())
+            synced.append(f"command/{cf.name}")
 
     return synced
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Distill and synchronize workflow improvements to core repository.")
-    parser.add_argument("--base-dir", default=DEFAULT_BASE_DIR,
-                        help=f"Path to central base workflow repository (default: {DEFAULT_BASE_DIR})")
-    parser.add_argument("--source-dir", default=os.getcwd(),
-                        help="Path to current project root (default: cwd)")
-    parser.add_argument("--apply", action="store_true",
-                        help="Apply distilled changes to the base workflow repository and create a commit")
-    parser.add_argument("--sync-global", action="store_true",
-                        help="Also synchronize changes to ~/.gemini/config/")
+    parser = argparse.ArgumentParser(description="Distill and synchronize OpenCode workflow improvements.")
+    parser.add_argument("--base-dir", default=DEFAULT_BASE_DIR, help=f"Path to central workflow repo (default: {DEFAULT_BASE_DIR})")
+    parser.add_argument("--source-dir", default=os.getcwd(), help="Path to current project root (default: cwd)")
+    parser.add_argument("--apply", action="store_true", help="Apply distilled changes and commit to base workflow")
+    parser.add_argument("--sync-global", action="store_true", help="Sync to ~/.config/opencode/")
     parser.add_argument("--commit-msg", help="Custom commit message for base repo")
+    parser.add_argument("--no-sync-doc", action="store_true", help="Skip doc submodule update")
     args = parser.parse_args()
 
     source_dir = Path(args.source_dir).expanduser().resolve()
     base_dir = detect_base_repository(args.base_dir)
 
-    sync_opencode_doc_submodule(base_dir)
-
-    print(f"=== Antigravity Workflow Distillation ===")
+    print("=== OpenCode Workflow Distillation ===")
     print(f"Source Project : {source_dir}")
     print(f"Base Workflow  : {base_dir}")
     print("")
 
+    if not args.no_sync_doc:
+        sync_opencode_doc_submodule(base_dir)
+
     if source_dir == base_dir:
-        print("Notice: Source project is already the base workflow repository. Inspecting internal consistency.")
+        print("Notice: Le projet source est deja le depot de base. Verification de coherence interne.")
 
     results = compare_and_distill_files(source_dir, base_dir)
 
-    print(f"Identical files : {len(results['identical'])}")
-    print(f"Modified files  : {len(results['modified'])}")
-    print(f"New elements    : {len(results['new_in_project'])}")
+    print(f"Fichiers identiques : {len(results['identical'])}")
+    print(f"Fichiers modifies   : {len(results['modified'])}")
+    print(f"Nouveaux elements   : {len(results['new_in_project'])}")
     print("")
 
     if results["warnings"]:
-        print("Sanitization & Security Warnings:")
+        print("Avertissements de securite et sanitarisation :")
         for w in results["warnings"]:
             print(f"  - [WARN] {w}")
         print("")
 
     if results["modified"]:
-        print("Modified Elements to Distill:")
+        print("Elements modifies a distiller :")
         for item in results["modified"]:
             print(f"  * {item['path']}")
-            if not args.apply:
-                print("    --- Diff Preview ---")
-                for line in item["diff"].splitlines()[:15]:
-                    print(f"    {line}")
         print("")
 
     if results["new_in_project"]:
-        print("New Elements to Add to Core Base:")
+        print("Nouveaux elements a ajouter a la base :")
         for item in results["new_in_project"]:
             print(f"  + {item['path']}")
         print("")
 
     if args.apply:
         if source_dir == base_dir and not results["new_in_project"] and not results["modified"]:
-            print("No external changes to apply (already in base repo).")
+            print("Aucune modification externe a appliquer (deja dans le depot de base).")
         else:
             applied = apply_distillation(results, base_dir, args.commit_msg)
-            print(f"Successfully distilled and updated {len(applied)} files in base workflow.")
+            print(f"Distillation reussie : {len(applied)} fichiers synchronises dans le workflow de base.")
 
         if args.sync_global:
-            global_dir = Path(os.path.expanduser("~/.gemini/config"))
-            synced = sync_to_global_config(base_dir, global_dir)
-            print(f"Synchronized {len(synced)} elements to global configuration ({global_dir}).")
+            global_dir = Path(os.path.expanduser("~/.config/opencode"))
+            synced = sync_to_global_opencode(base_dir, global_dir)
+            print(f"Synchronisation globale effectuee : {len(synced)} elements dans {global_dir}.")
     else:
-        print("Dry run completed. Run with --apply to synchronize and commit to base workflow.")
+        print("Simulation terminee. Utilisez --apply pour enregistrer et commiter dans le workflow de base.")
 
 
 if __name__ == "__main__":
