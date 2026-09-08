@@ -1,0 +1,95 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-3-7-sonnet",
+  "small_model": "google/gemini-2.0-flash",
+  "default_agent": "build",
+  "subagent_depth": 1,
+  "instructions": [
+    ".opencode/AGENTS.md",
+    "docs/opencode/README.md"
+  ],
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@executeautomation/playwright-mcp-server"
+      ],
+      "enabled": true
+    }
+  },
+  "permission": {
+    "read": "allow",
+    "edit": "allow",
+    "write": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "todowrite": "allow",
+    "question": "ask",
+    "bash": {
+      "rm -rf /": "deny",
+      "rm -rf /root": "deny",
+      "rm -rf /etc": "deny",
+      "git push": "ask",
+      "*": "allow"
+    }
+  },
+  "agent": {
+    "coder": {
+      "description": "Expert Software Engineer dedie a l'implementation de code propre, type, modulaire et robuste.",
+      "mode": "subagent",
+      "model": "anthropic/claude-3-7-sonnet",
+      "permission": {
+        "read": "allow",
+        "edit": "allow",
+        "write": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "bash": "allow"
+      }
+    },
+    "researcher": {
+      "description": "Specialiste de la recherche technique, exploration d'APIs, documentation officielle et inspection terrain.",
+      "mode": "subagent",
+      "model": "google/gemini-2.0-flash",
+      "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "webfetch": "allow",
+        "websearch": "allow",
+        "bash": "allow",
+        "edit": "deny",
+        "write": "deny"
+      }
+    },
+    "ui-tester": {
+      "description": "Testeur QA et validation visuelle pilotant Playwright MCP pour capturer des screenshots Desktop et Mobile.",
+      "mode": "subagent",
+      "model": "google/gemini-2.0-flash",
+      "permission": {
+        "read": "allow",
+        "bash": "allow",
+        "edit": "deny",
+        "write": "deny"
+      }
+    },
+    "pedagogue": {
+      "description": "Agent pedagogue expert en vulgarisation, modelisation mathematique/algorithmique et preparation aux soutenances.",
+      "mode": "subagent",
+      "model": "anthropic/claude-3-7-sonnet",
+      "permission": {
+        "read": "allow",
+        "write": "allow",
+        "edit": "allow",
+        "bash": "deny"
+      }
+    }
+  }
+}
