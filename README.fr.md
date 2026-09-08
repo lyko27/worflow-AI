@@ -1,114 +1,60 @@
 [🇬🇧 Read in English](README.md)
 
-# Workflows Multi-Agents Compartimentes — OpenCode & Antigravity (AGY)
+# Workflow Multi-Agents pour l'IA
 
-Ce depot propose **deux stacks d'ingenierie logicielle assistee par IA strictement compartimentees et independantes** :
-1. **`workflows/opencode/`** : Stack native **OpenCode** (TUI, modele agnostique, snapshots Git `/undo` / `/redo`, commandes slash).
-2. **`workflows/agy/`** : Stack native **Antigravity CLI (AGY)** (Orchestration multi-agents native Google DeepMind).
+Un système multi-agents structuré pour éliminer les erreurs courantes du code généré par IA (hallucinations d'APIs, manque de cadrage, code non testé) grâce à un cycle d'ingénierie rigoureux en 4 étapes.
 
-Le but fondamental de chaque workflow est d'eviter les erreurs classiques des LLMs (hallucinations d'APIs, manque de planification, code non teste, regressions silencieuses) en appliquant un cycle d'ingenierie rigoureux en 4 etapes.
+Compatible avec deux environnements indépendants : **OpenCode** et **Antigravity CLI (AGY)**.
 
 ---
 
-## 1. Comment ca marche (Cycle en 4 Phases)
+### Comment ça marche
 
-Chaque stack fonctionne avec un agent principal (**Lead Architect / Coordinator**) orchestrant 4 sous-agents specialises :
+Un agent principal (**Lead Coordinator**) pilote des sous-agents spécialisés de manière séquentielle :
 
 ```mermaid
-flowchart TD
-    Start([Demande / Tache]) --> P1[1. Recherche & Cadrage\n@researcher en Mode Plan]
-    P1 -->|Spec Validee - Barriere Stricte| FanOut{Fan-Out Parallele}
-    FanOut -->|Branche Code| P2A[2A. Implementation du Code\n@coder en Mode Build]
-    FanOut -->|Branche Pedagogie| P2B[2B. Formalisation & Soutenance\n@pedagogue]
-    P2A --> P3[3. Test Visuel & QA\n@ui-tester + Playwright MCP]
-    P2B --> P4
-    P3 --> P4{4. Validation Finale\nLead Architect}
-    P4 -- Retouches si besoin --> P2A
-    P4 -- Valide --> End([Termine])
+flowchart LR
+    P1["1. Recherche\n(@researcher)"] --> P2["2. Code & Théorie\n(@coder / @pedagogue)"]
+    P2 --> P3["3. Tests & QA\n(@ui-tester + Playwright)"]
+    P3 --> P4["4. Validation\n(Lead Architect)"]
 ```
 
-1. **Recherche (`@researcher`)** : Verifie la documentation officielle, inspecte les fichiers existants et cadre la tache en lecture seule. Le codeur ne demarre pas tant que ce cadrage n'est pas valide (**Barriere Sequentielle**).
-2. **Implementation (`@coder`)** : Ecrit le code propre, type, modulaire et sans hallucination en suivant strictement la specification de la phase 1.
-3. **Formalisation & Pedagogie (`@pedagogue`)** : Vulgarise les concepts complexes, produit la modelisation mathematique/algorithmique, les schemas Mermaid et les fiches d'oral de soutenance.
-4. **Tests & QA Visuel (`@ui-tester`)** : Pilote un navigateur reel via Playwright MCP, teste les parcours et prend des captures d'ecran obligatoires (**Desktop 1200px** et **Mobile 390px**).
-5. **Validation (Lead)** : Verifie le diff Git et inspecte visuellement les captures d'ecran avant de cloturer la tache.
+1. **Recherche (`@researcher`)** : Analyse la documentation et la base de code en lecture seule. L'écriture du code est bloquée tant que ce cadrage n'est pas validé.
+2. **Implémentation (`@coder` / `@pedagogue`)** : Écrit du code propre et typé ou modélise l'architecture sans inventer d'APIs ni de dépendances.
+3. **Tests & QA Visuel (`@ui-tester`)** : Pilote un navigateur réel via Playwright MCP et capture les écrans (Desktop 1200px et Mobile 390px).
+4. **Validation (Lead)** : Vérifie le diff Git et les captures d'écran avant de clôturer la tâche.
 
 ---
 
-## 2. Architecture Compartimentee & Deploiement
+### Démarrage rapide
 
-Les deux stacks sont separees dans leurs sous-dossiers dedies :
-
-### Deploiement Rapide avec le Script Racine :
 ```bash
-# Deploiement OpenCode
-./setup.sh opencode                     # dans le dossier courant
-./setup.sh opencode /chemin/vers/projet # dans un projet cible
-./setup.sh opencode --global            # globalement dans ~/.config/opencode/
-
-# Deploiement Antigravity (AGY)
-./setup.sh agy                          # dans le dossier courant
-./setup.sh agy /chemin/vers/projet      # dans un projet cible
-./setup.sh agy --global                 # globalement dans ~/.gemini/config/
-
-# Menu interactif
+# Lancer l'installateur interactif
 ./setup.sh
+
+# Ou installer directement :
+./setup.sh opencode     # Stack OpenCode
+./setup.sh agy          # Stack Antigravity
+./setup.sh agy --global # Installation globale dans ~/.gemini/config/
 ```
 
-### Deploiement Direct depuis les Dossiers de Workflow :
-- **OpenCode** : `./workflows/opencode/setup_opencode.sh [DOSSIER_CIBLE]`
-- **Antigravity (AGY)** : `./workflows/agy/setup_agents.sh [DOSSIER_CIBLE]`
-
 ---
 
-## 3. Competences d'Amelioration Continue (Cycle "Learn")
-
-Chaque stack dispose de commandes dediees pour l'introspection et la distillation :
-
-- **`/learn-local`** : 
-  - Met a jour automatiquement le sous-module de documentation (`git submodule update --remote docs/opencode`).
-  - Analyse les logs de session/conversation pour detecter les frictions et erreurs d'outils.
-  - Adapte les invites des sous-agents locaux et la configuration du projet.
-- **`/learn-global`** :
-  - Met a jour `docs/opencode`.
-  - Analyse les evolutions locales avec verification anti-fuite (suppression des secrets et chemins absolus).
-  - Synchronise les ameliorations universelles vers le dossier correspondant (`workflows/opencode/` ou `workflows/agy/`).
-
----
-
-## 4. Structure Compartimentee du Depot
+### Structure du dépôt
 
 ```text
 workflow/
 ├── workflows/
-│   ├── agy/                                      # Stack Antigravity CLI (AGY) dediee
-│   │   ├── .agents/
-│   │   │   ├── agents/                           # coder, researcher, ui-tester, pedagogue
-│   │   │   ├── skills/                           # learn-local, learn-global
-│   │   │   └── mcp_config.json                   # Configuration Playwright MCP
-│   │   ├── AGENTS.md                             # Protocole de gouvernance Agy
-│   │   ├── documentation_agy.md                  # Manuel technique complet Agy
-│   │   └── setup_agents.sh                       # Script de deploiement Agy
-│   │
-│   └── opencode/                                 # Stack OpenCode dediee
-│       ├── .opencode/
-│       │   ├── opencode.json                     # Configuration OpenCode (schema officiel)
-│       │   ├── AGENTS.md                         # Protocole de gouvernance OpenCode
-│       │   ├── agents/                           # coder.md, researcher.md, etc.
-│       │   ├── command/                          # /learn-local.md, /learn-global.md
-│       │   └── skills/                           # Scripts python d'introspection & distillation
-│       ├── opencode.json                         # Miroir configuration racine OpenCode
-│       ├── documentation_opencode.md             # Manuel technique complet OpenCode
-│       └── setup_opencode.sh                     # Script de deploiement OpenCode
-│
-├── docs/
-│   └── opencode/                                 # [Git Submodule] Documentation officielle OpenCode
-├── scripts/
-│   └── verify_dual_stack.py                      # Suite de tests et validation d'integrite
-├── setup.sh                                      # Script d'installation racine universel
-├── .gitmodules                                   # Enregistrement du sous-module docs/opencode
-├── .gitignore
-├── LICENSE
-├── README.fr.md                                  # Documentation francaise
-└── README.md                                     # English documentation (default)
+│   ├── opencode/      # Stack OpenCode (config, agents, skills)
+│   └── agy/           # Stack Antigravity CLI (agents, config MCP, docs)
+├── docs/opencode/     # Documentation officielle OpenCode (sous-module)
+├── setup.sh           # Script d'installation universel
+└── LICENSE            # Licence MIT
 ```
+
+---
+
+### Auteur & Licence
+
+- **Auteur** : [Natéo Gadaix](https://github.com/lyko27) ([Portfolio](https://perso.isima.fr/~nagadaix/) • [LinkedIn](https://www.linkedin.com/in/nat%C3%A9o-gadaix-7507a0383/))
+- **Licence** : [MIT](LICENSE)
