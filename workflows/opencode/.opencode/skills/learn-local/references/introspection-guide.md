@@ -29,13 +29,14 @@ Ce guide fournit la methodologie de reference pour analyser les sessions OpenCod
    - Inserer les contraintes de stack technique decouvertes dans le projet.
 
 2. **Creation d'un Nouveau Sous-Agent Local (`.opencode/agents/<nouveau-role>.md`)** :
-   - Format standardise avec frontmatter YAML :
+   - Format standardise avec frontmatter YAML (aucun modele fige : l'agent herite
+     du modele de session, le tier se choisit via `model` / `small_model` globaux) :
      ```markdown
      ---
-     name: nom-du-role
-     description: Description courte et precise de la responsabilite.
+     description: Responsabilite et cas d'usage precis (declenche l'invocation auto).
      mode: subagent
-     model: anthropic/claude-3-7-sonnet
+     temperature: 0.3
+     steps: 20
      permission:
        read: allow
        edit: allow

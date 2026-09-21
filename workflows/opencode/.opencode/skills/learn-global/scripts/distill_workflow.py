@@ -49,12 +49,14 @@ def sync_opencode_doc_submodule(repo_dir: Path) -> bool:
     if git_root:
         try:
             print("[SYNC] Synchronisation prealable de la documentation OpenCode...")
+            target = repo_dir.resolve()
+            rel = os.path.relpath(target / "docs" / "opencode", git_root)
             res = subprocess.run(
-                ["git", "submodule", "update", "--init", "--recursive", "--remote", "docs/opencode"],
+                ["git", "submodule", "update", "--init", "--recursive", "--remote", "--", rel],
                 cwd=git_root,
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=60
             )
             if res.returncode == 0:
                 print("  [OK] Documentation OpenCode a jour.")
@@ -276,7 +278,7 @@ def main():
     print("")
 
     if not args.no_sync_doc:
-        sync_opencode_doc_submodule(base_dir)
+        sync_opencode_doc_submodule(source_dir)
 
     if source_dir == base_dir:
         print("Notice: Le projet source est deja le depot de base. Verification de coherence interne.")

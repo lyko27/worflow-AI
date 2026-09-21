@@ -24,16 +24,19 @@ Ton role est de diriger, orchestrer, decomposer les taches complexes et valider 
 
 ---
 
-## 2. Cartographie des Sous-Agents et Attribution des Modeles (Tiering)
+## 2. Cartographie des Sous-Agents et Tiers de Modeles
 
-Dans OpenCode, les sous-agents sont invoques automatiquement ou via la syntaxe `@nom_agent` :
+Dans OpenCode, les sous-agents sont invoques automatiquement (via leur `description`) ou via la syntaxe `@nom_agent`.
+Aucun modele n'est fige dans les definitions : chaque agent herite du modele de la session appelante.
+Le tier indique quel niveau de modele choisir via la configuration globale (`model` = Tier Pro,
+`small_model` = Tier Flash).
 
-| Sous-Agent | Fichier de Definition | Specialite | Tier Modele | Modèle OpenCode |
-| :--- | :--- | :--- | :--- | :--- |
-| **`@researcher`** | `.opencode/agents/researcher.md` | Recherche doc APIs, scraping, inspection de sources et depots reels | **`flash`** | `google/gemini-2.0-flash` |
-| **`@ui-tester`** | `.opencode/agents/ui-tester.md` | QA, tests Playwright MCP, capture d'ecran Desktop et Mobile | **`flash`** | `google/gemini-2.0-flash` |
-| **`@coder`** | `.opencode/agents/coder.md` | Implementation, refactoring, typage strict, architecture logicielle | **`pro`** | `anthropic/claude-3-7-sonnet` |
-| **`@pedagogue`** | `.opencode/agents/pedagogue.md` | Vulgarisation, modelisation mathematique, fiches de soutenance | **`pro`** | `anthropic/claude-3-7-sonnet` |
+| Sous-Agent | Fichier de Definition | Specialite | Tier requis |
+| :--- | :--- | :--- | :--- |
+| **`@researcher`** | `.opencode/agents/researcher.md` | Recherche doc APIs, scraping, inspection de sources et depots reels | **Flash** (rapide, large contexte, economique) |
+| **`@ui-tester`** | `.opencode/agents/ui-tester.md` | QA, tests Playwright MCP, capture d'ecran Desktop et Mobile | **Flash** multimodal (vision rapide) |
+| **`@coder`** | `.opencode/agents/coder.md` | Implementation, refactoring, typage strict, architecture logicielle | **Pro** (raisonnement fort) |
+| **`@pedagogue`** | `.opencode/agents/pedagogue.md` | Vulgarisation, modelisation mathematique, fiches de soutenance | **Pro** (rigueur formelle) |
 
 ---
 
@@ -70,9 +73,12 @@ flowchart TD
 
 ## 5. Synchronisation Obligatoire de la Documentation
 
-La documentation de reference OpenCode est integree sous le chemin `docs/opencode` en tant que Git Submodule.  
-Toute operation du cycle "learn" ou d'actualisation des instructions execute prealablement :
+La documentation de reference OpenCode est integree sous le chemin `docs/opencode` en tant que Git Submodule
+(depot `https://github.com/anomalyco/opencode`, branche `dev`, sparse-checkout sur
+`packages/web/src/content/docs/`). Les guides locaux complementaires vivent dans `docs/opencode-notes/`.
+Toute operation du cycle "learn" ou d'actualisation des instructions execute prealablement,
+depuis le repertoire du projet :
 ```bash
-git submodule update --init --recursive --remote docs/opencode
+git submodule update --init --recursive --remote -- ./docs/opencode
 ```
 Cela garantit que l'agent se base en permanence sur la documentation et les fonctionnalites OpenCode les plus recentes.

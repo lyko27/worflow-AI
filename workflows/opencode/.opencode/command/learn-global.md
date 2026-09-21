@@ -4,7 +4,7 @@ agent: build
 ---
 
 ### Etape 1 : Synchronisation prealable de la documentation OpenCode
-!`git submodule update --init --recursive --remote docs/opencode`
+!`git submodule update --init --recursive --remote -- ./docs/opencode`
 
 ### Etape 2 : Verification comparative et scan anti-fuite (Dry-Run)
 !`python3 .opencode/skills/learn-global/scripts/distill_workflow.py`

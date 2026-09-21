@@ -31,12 +31,14 @@ def sync_opencode_doc_submodule(repo_dir: Path) -> bool:
     if git_root:
         try:
             print("[SYNC] Verification et mise a jour du sous-module docs/opencode...")
+            target = repo_dir.resolve()
+            rel = os.path.relpath(target / "docs" / "opencode", git_root)
             res = subprocess.run(
-                ["git", "submodule", "update", "--init", "--recursive", "--remote", "docs/opencode"],
+                ["git", "submodule", "update", "--init", "--recursive", "--remote", "--", rel],
                 cwd=git_root,
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=60
             )
             if res.returncode == 0:
                 print("  [OK] Documentation OpenCode synchronisee.")

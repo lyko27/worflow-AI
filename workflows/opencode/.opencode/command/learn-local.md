@@ -4,13 +4,13 @@ agent: build
 ---
 
 ### Etape 1 : Synchronisation prealable de la documentation OpenCode
-!`git submodule update --init --recursive --remote docs/opencode`
+!`git submodule update --init --recursive --remote -- ./docs/opencode`
 
 ### Etape 2 : Analyse des signaux de session et extraction des retours
 !`python3 .opencode/skills/learn-local/scripts/extract_conversation_insights.py`
 
 ### Etape 3 : Cadrage et adaptation
-A partir des signaux extraits ci-dessus et des dernieres fonctionnalites d'OpenCode documentees dans @docs/opencode/README.md :
+A partir des signaux extraits ci-dessus et des dernieres fonctionnalites d'OpenCode documentees dans @docs/opencode/packages/web/src/content/docs/agents.mdx et @docs/opencode-notes/opencode-github.md :
 1. Analyse les retours de l'utilisateur, les corrections de code et les erreurs d'outils rencontrees.
 2. Identifie si des ajustements doivent etre apportes :
    - Dans la configuration generale : @.opencode/opencode.json
