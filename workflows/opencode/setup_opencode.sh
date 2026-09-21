@@ -161,7 +161,7 @@ fi
 
 # 5. Resume et validation
 echo ""
-echo -e "${BLUE}[5/5] Resume de l'architecture OpenCode...${NC}"
+echo -e "${BLUE}[5/6] Resume de l'architecture OpenCode...${NC}"
 echo -e "  ${GREEN}[OK]${NC} Agent @researcher : Recherche technique, verite terrain & documentation"
 echo -e "  ${GREEN}[OK]${NC} Agent @coder      : Implementation propre, typage strict, zero-hallucination"
 echo -e "  ${GREEN}[OK]${NC} Agent @ui-tester  : QA, navigation Playwright MCP & captures Desktop/Mobile"
@@ -169,6 +169,15 @@ echo -e "  ${GREEN}[OK]${NC} Agent @pedagogue  : Vulgarisation formelle, formali
 echo -e "  ${GREEN}[OK]${NC} Commande /learn-local  : Auto-sync doc + introspection session"
 echo -e "  ${GREEN}[OK]${NC} Commande /learn-global : Auto-sync doc + distillation de workflow vers depot central"
 echo -e "  ${GREEN}[OK]${NC} Documentation OpenCode : Git Submodule sous docs/opencode"
+
+echo ""
+echo -e "${BLUE}[6/6] Enregistrement du depot central de workflow...${NC}"
+WORKFLOW_BASE_FILE="$HOME/.config/opencode/workflow-base"
+CENTRAL_ROOT="$(cd "${SCRIPT_DIR}" && git rev-parse --show-toplevel 2>/dev/null || echo "${SCRIPT_DIR}")"
+mkdir -p "$(dirname "${WORKFLOW_BASE_FILE}")"
+echo "${CENTRAL_ROOT}" > "${WORKFLOW_BASE_FILE}"
+echo -e "  ${GREEN}[OK]${NC} Chemin central enregistre dans ${CYAN}${WORKFLOW_BASE_FILE}${NC} : ${CENTRAL_ROOT}"
+echo -e "  ${CYAN}[INFO]${NC} /learn-global et distill_workflow.py le reutilisent (priorite : --base-dir > \$WORKFLOW_BASE_DIR > ce fichier)."
 
 echo ""
 echo -e "${GREEN}================================================================${NC}"

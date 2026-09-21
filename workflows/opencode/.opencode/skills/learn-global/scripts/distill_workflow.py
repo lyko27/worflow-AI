@@ -27,6 +27,26 @@ DEFAULT_BASE_DIR = os.environ.get(
     "/home/lyko/Dossier-perso/workflow"
 )
 
+WORKFLOW_BASE_FILE = Path(os.path.expanduser("~/.config/opencode/workflow-base"))
+
+
+def _default_base_dir() -> str:
+    """Resolves the central workflow path: env > saved file > legacy default."""
+    env_path = os.environ.get("WORKFLOW_BASE_DIR", "").strip()
+    if env_path:
+        return env_path
+    try:
+        for line in WORKFLOW_BASE_FILE.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line and not line.startswith("#"):
+                return line
+    except OSError:
+        pass
+    return DEFAULT_BASE_DIR
+
+
+DEFAULT_BASE_DIR = _default_base_dir()
+
 SENSITIVE_PATTERNS = [
     r"api[_-]?key\s*[:=]\s*['\"][^'\"]+['\"]",
     r"bearer\s+[a-zA-Z0-9_\-\.]{15,}",
